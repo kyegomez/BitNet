@@ -82,7 +82,8 @@ class BitLinear(nn.Module):
         # dequant the output
         dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
 
-        return x, dequant
+        # return x, dequant #doesn't work returns tuple not tensor
+        return dequant
 
 
 def FeedForward(dim, dropout=0.0):
@@ -183,14 +184,7 @@ class Transformer(nn.Module):
 
 
 # example
-# x = torch.randn(10, 512)
-# layer = Transformer(512, 8, 8, 64)
-# y = layer(x)
-# print(y)
-
-
-# #random tensors
-# x = torch.randn(10, 512)
-# feedforward = FeedForward(512)
-# out = feedforward(x)
-# print(out)
+x = torch.randn(10, 512)
+layer = Transformer(512, 8, 8, 64)
+y = layer(x)
+print(y)
