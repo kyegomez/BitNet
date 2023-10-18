@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+
 def absmax_quantize(x):
     """
     Absmax quantization function.
@@ -46,9 +47,6 @@ class BitLinear(nn.Module):
         >>> layer = BitLinear(512)
         >>> y, dequant = layer(x)
         >>> print(y, dequant)
-
-
-
 
     """
 

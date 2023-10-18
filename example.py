@@ -2,11 +2,14 @@ import torch
 
 from bitnet.bitlinear import BitLinear
 
-# example
+# Random Inputs
 x = torch.randn(10, 512)
 
+# BiLinear Layer
 layer = BitLinear(512)
 
-y, dequant = layer(x)
+# Apply BiLinear Layer
+quantizate = layer(x)
 
-print(y, dequant)
+
+print(quantizate)

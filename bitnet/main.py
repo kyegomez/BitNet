@@ -1,91 +1,10 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
 from zeta.nn.attention.attend import Attend
+from bitnet.bitlinear import BitLinear
 
 
-def absmax_quantize(x):
-    """
-    Absmax quantization function.
-
-    Args:
-        x: tensor, input.
-
-    Returns:
-        tensor, quantized input.
-
-    Usage:
-        >>> x = torch.randn(10, 512)
-        >>> quant = absmax_quantize(x)
-        >>> print(quant)
-
-    """
-    # calculate scale
-    scale = 127 / torch.max(torch.abs(x))
-
-    # quantize
-    quant = (scale * x).round()
-
-    # dequantize
-    dequant = quant / scale
-
-    return quant.to(torch.int8), dequant
-
-
-class BitLinear(nn.Module):
-    """
-    BitLinear layer for Transformer.
-
-
-    Args:
-        dim: int, dimension of the input.
-
-    Returns:
-        tensor, output of the BitLinear layer.
-
-    Usage:
-        >>> x = torch.randn(10, 512)
-        >>> layer = BitLinear(512)
-        >>> y, dequant = layer(x)
-        >>> print(y, dequant)
-
-
-
-
-    """
-
-    def __init__(
-        self,
-        dim,
-    ):
-        super().__init__()
-        self.dim = dim
-
-        self.norm = nn.LayerNorm(dim)
-        self.linear = nn.Linear(dim, dim)
-        self.abs_max_quantization = absmax_quantize
-
-    def forward(self, x):
-        """Forward pass of the BitLinear layer."""
-        x = self.norm(x)
-
-        # Binarize the weights
-        weight = self.linear.weight
-        weight_binarized = torch.sign(weight).char()
-
-        # quantize the output
-        x, dequant = self.abs_max_quantization(x)
-
-        # Apply the linear operation with the binarized weights
-        x = F.linear(x, weight_binarized, self.linear.bias.char())
-
-        # dequant the output
-        dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
-
-        # return x, dequant #doesn't work returns tuple not tensor
-        return dequant
-
-
+# Feedforward network
 def FeedForward(dim, dropout=0.0):
     """
     Feedforward network for Transformer with BitLinear layers instead.
@@ -114,7 +33,7 @@ def FeedForward(dim, dropout=0.0):
     )
 
 
-class Transformer(nn.Module):
+class BitNetTransformer(nn.Module):
     """
     Transformer with BitLinear layers instead.
 
@@ -130,7 +49,7 @@ class Transformer(nn.Module):
 
     Usage:
         >>> x = torch.randn(10, 512)
-        >>> layer = Transformer(512, 8, 8, 64)
+        >>> layer = BitNetTransformer(512, 8, 8, 64)
         >>> y = layer(x)
         >>> print(y)
 
@@ -156,7 +75,8 @@ class Transformer(nn.Module):
                 )
             )
         self.norm = nn.LayerNorm(dim)
-
+        
+        # Bi Linear Layer
         self.bitlinear = BitLinear(dim)
 
     def forward(
@@ -170,6 +90,7 @@ class Transformer(nn.Module):
 
         """
         for attn, ff in self.layers:
+            #apply by linear to x to create q, k, v
             q = self.bitlinear(x)
             k = self.bitlinear(x)
             v = self.bitlinear(x)
@@ -183,10 +104,3 @@ class Transformer(nn.Module):
             x = ff(x) + x
 
         return self.norm(x)
-
-if __name__ == "__main__":
-    # example
-    x = torch.randn(1, 1, 10, 512)
-    layer = Transformer(512, 8, 8, 64)
-    y = layer(x)
-    print(y)

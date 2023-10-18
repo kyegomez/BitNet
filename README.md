@@ -66,4 +66,4 @@ Eprint = {arXiv:2310.11453},
 
 # Todo
 - [ ] Fix transformer pass error [issue](https://github.com/kyegomez/BitNet/issues/5)
-
+- [ ] Split up q, k, v in one line 
