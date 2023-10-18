@@ -174,7 +174,9 @@ class Transformer(nn.Module):
             k = self.bitlinear(x)
             v = self.bitlinear(x)
 
-            x = attn(q, k, v, mask=mask) + x
+            out, intermediates = attn(q, k, v, mask=mask)
+
+            x = out + x
 
             x = self.bitlinear(x)
 
@@ -184,7 +186,7 @@ class Transformer(nn.Module):
 
 
 # example
-x = torch.randn(10, 512)
+x = torch.randn(1, 1, 10, 512)
 layer = Transformer(512, 8, 8, 64)
 y = layer(x)
 print(y)
