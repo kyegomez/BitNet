@@ -15,22 +15,20 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization
 ```python
 import torch 
 from bitnet import BitLinear
-from bitnet.main import Transformer
 
-
-#example 1
+# random inputs
 x = torch.randn(10, 512)
+
+#apply linear
 layer = BitLinear(512)
+
+#layer
 y, dequant = layer(x)
+
+#print
 print(y, dequant)
 
-#example 2
-x = torch.randn(1, 1, 10, 512)
-layer = Transformer(512, 8, 8, 64)
-y = layer(x)
-print(y)
 ```
-
 ----
 
 - Running an example to a full BitNet Transformer as shown in paper:
