@@ -2,8 +2,22 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-
 def absmax_quantize(x):
+    """
+    Absmax quantization function.
+
+    Args:
+        x: tensor, input.
+
+    Returns:
+        tensor, quantized input.
+
+    Usage:
+        >>> x = torch.randn(10, 512)
+        >>> quant = absmax_quantize(x)
+        >>> print(quant)
+
+    """
     # calculate scale
     scale = 127 / torch.max(torch.abs(x))
 
@@ -17,6 +31,27 @@ def absmax_quantize(x):
 
 
 class BitLinear(nn.Module):
+    """
+    BitLinear layer for Transformer.
+
+
+    Args:
+        dim: int, dimension of the input.
+
+    Returns:
+        tensor, output of the BitLinear layer.
+
+    Usage:
+        >>> x = torch.randn(10, 512)
+        >>> layer = BitLinear(512)
+        >>> y, dequant = layer(x)
+        >>> print(y, dequant)
+
+
+
+
+    """
+
     def __init__(
         self,
         dim,
@@ -29,6 +64,7 @@ class BitLinear(nn.Module):
         self.abs_max_quantization = absmax_quantize
 
     def forward(self, x):
+        """Forward pass of the BitLinear layer."""
         x = self.norm(x)
 
         # Binarize the weights
