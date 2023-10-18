@@ -1,7 +1,6 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
-
+import torch.nn.functional as F
 
 def absmax_quantize(x):
     """
@@ -70,15 +69,16 @@ class BitLinear(nn.Module):
 
         # Binarize the weights
         weight = self.linear.weight
-        weight_binarized = torch.sign(weight)
-
-        # Apply the linear operation with the binarized weights
-        x = F.linear(x, weight_binarized, self.linear.bias)
+        weight_binarized = torch.sign(weight).char()
 
         # quantize the output
         x, dequant = self.abs_max_quantization(x)
 
+        # Apply the linear operation with the binarized weights
+        x = F.linear(x, weight_binarized, self.linear.bias.char())
+
         # dequant the output
         dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
 
-        return x, dequant
+        # return x, dequant #doesn't work returns tuple not tensor
+        return dequant
