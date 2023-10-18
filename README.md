@@ -12,6 +12,7 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization
 `pip install bitnet`
 
 ## Usage:
+- Example of the BitLinear layer which is the main innovation of the paper!
 ```python
 import torch 
 from bitnet import BitLinear
