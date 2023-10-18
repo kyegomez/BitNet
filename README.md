@@ -8,7 +8,20 @@ Implementation of the "BitNet: Scaling 1-bit Transformers for Large Language Mod
 BitLinear = tensor -> layernorm -> Binarize -> abs max quantization 
 
 ## Installation
+`pip install bitnet`
 
+## Usage:
+```python
+import torch 
+from bitnet import BitLinear
+
+
+#example
+x = torch.randn(10, 512)
+layer = BitLinear(512)
+y, dequant = layer(x)
+print(y, dequant)
+```
 
 # License
 MIT

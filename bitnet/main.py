@@ -5,15 +5,14 @@ from zeta.nn.attention.attend import Attend
 
 
 def absmax_quantize(x):
-    #calculate scale
+    # calculate scale
     scale = 127 / torch.max(torch.abs(x))
 
-    #quantize
+    # quantize
     quant = (scale * x).round()
 
-    #dequantize
+    # dequantize
     dequant = quant / scale
-
 
     return quant.to(torch.int8), dequant
 
@@ -33,30 +32,30 @@ class BitLinear(nn.Module):
     def forward(self, x):
         x = self.norm(x)
 
-        #Binarize the weights
+        # Binarize the weights
         weight = self.linear.weight
         weight_binarized = torch.sign(weight)
 
-        #Apply the linear operation with the binarized weights
+        # Apply the linear operation with the binarized weights
         x = F.linear(x, weight_binarized, self.linear.bias)
 
-        #quantize the output
+        # quantize the output
         x, dequant = self.abs_max_quantization(x)
 
-        #dequant the output
-        dequant = dequant * torch.norm(weight) / (self.dim ** -0.5)
+        # dequant the output
+        dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
 
         return x, dequant
-    
 
-def FeedForward(dim, dropout=0.):
+
+def FeedForward(dim, dropout=0.0):
     """
     Feedforward network for Transformer with BitLinear layers instead.
 
     Args:
         dim: int, dimension of the input.
         dropout: float, dropout rate.
-    
+
     Returns:
         nn.Sequential, feedforward network.
 
@@ -65,7 +64,7 @@ def FeedForward(dim, dropout=0.):
         >>> ff = FeedForward(512)
         >>> y = ff(x)
         >>> print(y)
-    
+
     """
     return nn.Sequential(
         nn.LayerNorm(dim),
@@ -76,6 +75,7 @@ def FeedForward(dim, dropout=0.):
         nn.Dropout(dropout),
     )
 
+
 class Transformer(nn.Module):
     def __init__(
         self,
@@ -83,24 +83,27 @@ class Transformer(nn.Module):
         depth,
         heads,
         dim_head,
-        dropout=0.,
+        dropout=0.0,
     ):
         super().__init__()
         self.layers = nn.ModuleList([])
         for _ in range(depth):
-            self.layers.append(nn.ModuleList([
-                Attend(dropout=dropout, heads=heads, flash=False),
-                FeedForward(dim, dropout)
-            ]))
+            self.layers.append(
+                nn.ModuleList(
+                    [
+                        Attend(dropout=dropout, heads=heads, flash=False),
+                        FeedForward(dim, dropout),
+                    ]
+                )
+            )
         self.norm = nn.LayerNorm(dim)
-        
-        self.bitlinear = BitLinear(dim)
 
+        self.bitlinear = BitLinear(dim)
 
     def forward(
         self,
         x,
-        mask = None,
+        mask=None,
         # attn_mask = None
     ):
         for attn, ff in self.layers:
@@ -113,10 +116,11 @@ class Transformer(nn.Module):
             x = self.bitlinear(x)
 
             x = ff(x) + x
-        
+
         return self.norm(x)
 
-#example
+
+# example
 # x = torch.randn(10, 512)
 # layer = Transformer(512, 8, 8, 64)
 # y = layer(x)
