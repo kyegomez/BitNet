@@ -52,6 +52,17 @@ print(y)
 # License
 MIT
 
+# Citation
+```bibtex
+@misc{2310.11453,
+Author = {Hongyu Wang and Shuming Ma and Li Dong and Shaohan Huang and Huaijie Wang and Lingxiao Ma and Fan Yang and Ruiping Wang and Yi Wu and Furu Wei},
+Title = {BitNet: Scaling 1-bit Transformers for Large Language Models},
+Year = {2023},
+Eprint = {arXiv:2310.11453},
+}
+
+```
+
 
 # Todo
 - [ ] Fix transformer pass error [issue](https://github.com/kyegomez/BitNet/issues/5)
