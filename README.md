@@ -33,11 +33,20 @@ print(y)
 
 ----
 
-- Full BitNet Transformer as shown in paper:
+- Running an example to a full BitNet Transformer as shown in paper:
 ```python
+import torch 
+from bitnet.main import BitNetTransformer
+
+#random inputs
 x = torch.randn(10, 512)
-layer = Transformer(512, 8, 8, 64)
-y = layer(x)
+
+#transformer layer
+model = BitNetTransformer(512, 8, 8, 64)
+
+#apply transformer
+y = model(x)
+
 print(y)
 ```
 

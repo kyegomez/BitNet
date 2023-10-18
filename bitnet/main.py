@@ -114,7 +114,7 @@ def FeedForward(dim, dropout=0.0):
     )
 
 
-class Transformer(nn.Module):
+class BitNetTransformer(nn.Module):
     """
     Transformer with BitLinear layers instead.
 
