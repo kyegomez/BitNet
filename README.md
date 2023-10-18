@@ -15,6 +15,7 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization
 ```python
 import torch 
 from bitnet import BitLinear
+from bitnet.main import Transformer
 
 
 #example 1
