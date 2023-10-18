@@ -77,6 +77,26 @@ def FeedForward(dim, dropout=0.0):
 
 
 class Transformer(nn.Module):
+    """
+    Transformer with BitLinear layers instead.
+
+    Args:
+        dim: int, dimension of the input.
+        depth: int, number of layers.
+        heads: int, number of heads.
+        dim_head: int, dimension of each head.
+        dropout: float, dropout rate.
+
+    Returns:
+        tensor, output of the transformer.
+
+    Usage:
+        >>> x = torch.randn(10, 512)
+        >>> layer = Transformer(512, 8, 8, 64)
+        >>> y = layer(x)
+        >>> print(y)
+    
+    """
     def __init__(
         self,
         dim,
@@ -106,6 +126,10 @@ class Transformer(nn.Module):
         mask=None,
         # attn_mask = None
     ):
+        """
+        Forward pass of the transformer.
+        
+        """
         for attn, ff in self.layers:
             q = self.bitlinear(x)
             k = self.bitlinear(x)
@@ -128,7 +152,7 @@ class Transformer(nn.Module):
 
 
 # #random tensors
-x = torch.randn(10, 512)
-feedforward = FeedForward(512)
-out = feedforward(x)
-print(out)
+# x = torch.randn(10, 512)
+# feedforward = FeedForward(512)
+# out = feedforward(x)
+# print(out)
