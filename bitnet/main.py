@@ -183,10 +183,3 @@ class BitNetTransformer(nn.Module):
             x = ff(x) + x
 
         return self.norm(x)
-
-if __name__ == "__main__":
-    # example
-    x = torch.randn(1, 1, 10, 512)
-    layer = Transformer(512, 8, 8, 64)
-    y = layer(x)
-    print(y)
