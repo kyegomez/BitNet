@@ -184,9 +184,9 @@ class Transformer(nn.Module):
 
         return self.norm(x)
 
-
-# example
-x = torch.randn(1, 1, 10, 512)
-layer = Transformer(512, 8, 8, 64)
-y = layer(x)
-print(y)
+if __name__ == "__main__":
+    # example
+    x = torch.randn(1, 1, 10, 512)
+    layer = Transformer(512, 8, 8, 64)
+    y = layer(x)
+    print(y)
