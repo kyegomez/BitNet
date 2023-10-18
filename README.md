@@ -26,3 +26,7 @@ print(y, dequant)
 # License
 MIT
 
+
+# Todo
+- [ ] Fix transformer pass error [issue](https://github.com/kyegomez/BitNet/issues/5)
+
