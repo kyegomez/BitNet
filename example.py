@@ -1,5 +1,6 @@
-from bitnet.bitlinear import BitLinear
 import torch
+
+from bitnet.bitlinear import BitLinear
 
 # example
 x = torch.randn(10, 512)

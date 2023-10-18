@@ -1,13 +1,14 @@
-import torch 
+import torch
+
 from bitnet.main import BitNetTransformer
 
-#random inputs
+# random inputs
 x = torch.randn(10, 512)
 
-#transformer layer
+# transformer layer
 model = BitNetTransformer(512, 8, 8, 64)
 
-#apply transformer
+# apply transformer
 y = model(x)
 
 print(y)
