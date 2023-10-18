@@ -32,7 +32,7 @@ print(y, dequant)
 ```
 ----
 
-- Running an example to a full BitNet Transformer as shown in paper:
+- Running random inputs to a full BitNet Transformer as shown in paper:
 ```python
 import torch 
 from bitnet.main import BitNetTransformer
