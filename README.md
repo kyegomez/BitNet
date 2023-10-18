@@ -17,11 +17,17 @@ import torch
 from bitnet import BitLinear
 
 
-#example
+#example 1
 x = torch.randn(10, 512)
 layer = BitLinear(512)
 y, dequant = layer(x)
 print(y, dequant)
+
+#example 2
+x = torch.randn(1, 1, 10, 512)
+layer = Transformer(512, 8, 8, 64)
+y = layer(x)
+print(y)
 ```
 
 # License
