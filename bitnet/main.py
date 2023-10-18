@@ -1,10 +1,10 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 from zeta.nn.attention.attend import Attend
 from bitnet.bitlinear import BitLinear
 
 
-# Feedforward network
 def FeedForward(dim, dropout=0.0):
     """
     Feedforward network for Transformer with BitLinear layers instead.
@@ -49,7 +49,7 @@ class BitNetTransformer(nn.Module):
 
     Usage:
         >>> x = torch.randn(10, 512)
-        >>> layer = BitNetTransformer(512, 8, 8, 64)
+        >>> layer = Transformer(512, 8, 8, 64)
         >>> y = layer(x)
         >>> print(y)
 
@@ -75,8 +75,7 @@ class BitNetTransformer(nn.Module):
                 )
             )
         self.norm = nn.LayerNorm(dim)
-        
-        # Bi Linear Layer
+
         self.bitlinear = BitLinear(dim)
 
     def forward(
@@ -90,7 +89,6 @@ class BitNetTransformer(nn.Module):
 
         """
         for attn, ff in self.layers:
-            #apply by linear to x to create q, k, v
             q = self.bitlinear(x)
             k = self.bitlinear(x)
             v = self.bitlinear(x)

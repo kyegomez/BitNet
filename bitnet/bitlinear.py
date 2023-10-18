@@ -69,14 +69,14 @@ class BitLinear(nn.Module):
         weight = self.linear.weight
         weight_binarized = torch.sign(weight).char()
 
-        # quantize the output
+        # Quantize the output
         x, dequant = self.abs_max_quantization(x)
 
         # Apply the linear operation with the binarized weights
         x = F.linear(x, weight_binarized, self.linear.bias.char())
 
-        # dequant the output
+        # Dequant the output
         dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
 
-        # return x, dequant #doesn't work returns tuple not tensor
+        # Return x, dequant #doesn't work returns tuple not tensor
         return dequant

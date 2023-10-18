@@ -10,6 +10,6 @@ layer = BitLinear(512)
 
 # Apply BiLinear Layer
 quantizate = layer(x)
-
-
+    
+# Print
 print(quantizate)
