@@ -31,6 +31,16 @@ y = layer(x)
 print(y)
 ```
 
+----
+
+- Full BitNet Transformer as shown in paper:
+```python
+x = torch.randn(10, 512)
+layer = Transformer(512, 8, 8, 64)
+y = layer(x)
+print(y)
+```
+
 # License
 MIT
 
