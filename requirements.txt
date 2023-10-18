@@ -1,0 +1,3 @@
+torch
+einops
+zetascale

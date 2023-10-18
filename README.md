@@ -26,5 +26,3 @@ print(y, dequant)
 # License
 MIT
 
-
-
