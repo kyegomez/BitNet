@@ -19,7 +19,7 @@ def absmax_quantize(x, bits=8):
         >>> print(quant)
 
     """
-    Qb = 2**(bits-1) - 1
+    Qb = 2 ** (bits - 1) - 1
     scale = Qb / torch.max(torch.abs(x))
     quant = (scale * x).round()
     dequant = quant / scale

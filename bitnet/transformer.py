@@ -4,12 +4,14 @@ from einops import rearrange
 from torch import einsum, nn
 import math
 
+
 def absmax_quantize(x, bits=8):
-    Qb = 2**(bits-1) - 1
+    Qb = 2 ** (bits - 1) - 1
     scale = Qb / torch.max(torch.abs(x))
     quant = (scale * x).round()
     dequant = quant / scale
     return quant.to(torch.int8), dequant
+
 
 class BitLinear(nn.Module):
     def __init__(self, in_features, out_features, groups=1):
@@ -30,24 +32,26 @@ class BitLinear(nn.Module):
         weight = weight - weight.mean(dim=1, keepdim=True)
         weight = torch.sign(weight)
 
-        beta = torch.abs(weight).sum(dim=1, keepdim=True) / (weight.shape[0] * weight.shape[1])
+        beta = torch.abs(weight).sum(dim=1, keepdim=True) / (
+            weight.shape[0] * weight.shape[1]
+        )
 
         weight = weight * beta
         weight = weight.view(self.out_features, self.in_features)
-        
+
         # Absmax Quantization
         quant_input, _ = absmax_quantize(input)
 
         # matmul?
         output = F.linear(quant_input.float(), weight)
-        
+
         # Dequantization
         output = output / beta.view(-1, 1)
         return output
 
 
-
 # helpers
+
 
 def exists(val):
     return val is not None
