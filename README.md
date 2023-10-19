@@ -16,20 +16,20 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization
 ## Usage:
 - Example of the BitLinear layer which is the main innovation of the paper!
 ```python
-import torch 
+import torch
+
 from bitnet import BitLinear
 
-# random inputs
+# Input
 x = torch.randn(10, 512)
 
-#apply linear
-layer = BitLinear(512)
+# BitLinear layer
+layer = BitLinear(512, 400)
 
-#layer
-y, dequant = layer(x)
+# Output
+y = layer(x)
 
-#print
-print(y, dequant)
+print(y)
 
 ```
 ----
