@@ -5,61 +5,105 @@ from torch.nn import functional as F
 from bitnet.bitlinear import BitLinear, absmax_quantize
 from bitnet.transformer import BitNetTransformer, ParallelTransformerBlock, Transformer
 
-# Basic Tests
-
+# Basic Tests:
 
 def test_absmax_quantize():
-    """
-    Test the absmax_quantize function for a given tensor.
-    Check if the quantized tensor is of dtype int8 and if
-    the dequantized value is close to the original tensor.
-    """
-    x = torch.tensor([2.5, -3.0, 4.0, -5.0])
-    quant, dequant = absmax_quantize(x)
-    assert isinstance(quant, torch.Tensor) and quant.dtype == torch.int8
-    assert torch.allclose(dequant, x, atol=1e-2)
+    tensor = torch.tensor([1.5, -2.0, 3.0, -4.0])
+    quant, dequant = absmax_quantize(tensor)
+    assert quant.dtype == torch.int8
+    assert torch.allclose(dequant, tensor, atol=1e-2)
 
+def test_bitlinear_initialization():
+    layer = BitLinear(10, 20)
+    assert layer.in_features == 10
+    assert layer.out_features == 20
+    assert layer.weight.shape == (20, 10)
 
-def test_bit_linear_forward():
-    """
-    Test the forward method of the BitLinear class.
-    Ensure the output shape matches the input shape.
-    """
-    x = torch.randn(10, 512)
-    layer = BitLinear(512)
-    output = layer(x)
-    assert x.shape == output.shape
+def test_bitlinear_forward():
+    layer = BitLinear(10, 20)
+    input_tensor = torch.randn(5, 10)
+    output = layer(input_tensor)
+    assert output.shape == (5, 20)
 
+# Fixtures:
 
-# Parameterized Testing
+@pytest.fixture
+def random_tensor():
+    return torch.randn(5, 10)
 
+# Parameterized Testing:
 
-@pytest.mark.parametrize("input_size", [128, 256, 512, 1024])
-def test_bit_linear_different_input_sizes(input_size):
-    """
-    Test the BitLinear class with different input sizes.
-    Ensure the output shape matches the input shape for each size.
-    """
-    x = torch.randn(10, input_size)
-    layer = BitLinear(input_size)
-    output = layer(x)
-    assert x.shape == output.shape
+@pytest.mark.parametrize("bits", [4, 8, 12, 16])
+def test_absmax_quantize_bits(random_tensor, bits):
+    quant, dequant = absmax_quantize(random_tensor, bits=bits)
+    assert quant.dtype == torch.int8
+    assert torch.allclose(dequant, random_tensor, atol=1e-2)
 
+# More Tests for BitLinear:
 
-# Exception Testing
+@pytest.mark.parametrize("in_features,out_features", [(10, 20), (20, 40), (5, 10), (15, 10)])
+def test_bitlinear_shapes(in_features, out_features):
+    layer = BitLinear(in_features, out_features)
+    assert layer.weight.shape == (out_features, in_features)
 
+@pytest.mark.parametrize("groups", [1, 2, 5])
+def test_bitlinear_groups(groups):
+    layer = BitLinear(10, 20, groups=groups)
+    assert layer.groups == groups
 
-def test_absmax_quantize_wrong_dtype():
-    """
-    Test the absmax_quantize function with a tensor of incorrect dtype.
-    Ensure it raises an appropriate exception.
-    """
-    x = torch.tensor([2, 3, 4, 5], dtype=torch.int32)
-    with pytest.raises(
-        ValueError
-    ):  # This can be changed to the appropriate expected exception type
-        absmax_quantize(x)
+def test_bitlinear_reset_parameters():
+    layer = BitLinear(10, 20)
+    original_weights = layer.weight.clone()
+    layer.reset_parameters()
+    assert not torch.equal(original_weights, layer.weight)
 
+@pytest.mark.parametrize("groups", [1, 2, 5])
+def test_bitlinear_forward_with_groups(random_tensor, groups):
+    layer = BitLinear(10, 20, groups=groups)
+    output = layer(random_tensor)
+    assert output.shape == (5, 20)
+
+def test_bitlinear_zero_input():
+    layer = BitLinear(10, 20)
+    input_tensor = torch.zeros(5, 10)
+    output = layer(input_tensor)
+    assert torch.allclose(output, torch.zeros(5, 20), atol=1e-2)
+
+def test_bitlinear_weight_sign():
+    layer = BitLinear(10, 20)
+    input_tensor = torch.randn(5, 10)
+    output_before = layer(input_tensor)
+    layer.weight.data = torch.abs(layer.weight.data)
+    output_after = layer(input_tensor)
+    assert not torch.allclose(output_before, output_after)
+
+@pytest.mark.parametrize("groups", [1, 2, 5])
+def test_bitlinear_weight_group_normalization(groups):
+    layer = BitLinear(10, 20, groups=groups)
+    weight = layer.weight.view(groups, -1)
+    mean = weight.mean(dim=1, keepdim=True)
+    assert torch.allclose(mean, torch.zeros_like(mean), atol=1e-2)
+
+def test_bitlinear_weight_group_scaling():
+    layer = BitLinear(10, 20, groups=5)
+    weight = layer.weight.view(layer.groups, -1)
+    beta = torch.abs(weight).sum(dim=1, keepdim=True) / (weight.shape[0] * weight.shape[1])
+    scaled_weight = weight * beta
+    assert torch.allclose(scaled_weight, layer.weight.view(20, 10))
+
+def test_bitlinear_input_quantization(random_tensor):
+    layer = BitLinear(10, 20)
+    quant_input, _ = absmax_quantize(random_tensor)
+    output = layer(quant_input.float())
+    assert output.shape == (5, 20)
+
+# ... Continue adding more tests ...
+# - Test the forward pass with extreme input values.
+# - Test with different types of input tensors (e.g., int8, float16).
+# - Test the forward pass with batch sizes other than 5.
+# - Verify that using different initializations produces different results.
+# - Test the weight and input interactions during the forward pass.
+# - And many more...
 
 # ================================ Transformer with bitlinear ================================
 

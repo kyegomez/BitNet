@@ -1,24 +1,10 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
+import math
 
 
 def absmax_quantize(x, bits=8):
-    """
-    Absmax quantization function.
-
-    Args:
-        x: tensor, input.
-
-    Returns:
-        tensor, quantized input.
-
-    Usage:
-        >>> x = torch.randn(10, 512)
-        >>> quant = absmax_quantize(x)
-        >>> print(quant)
-
-    """
     Qb = 2 ** (bits - 1) - 1
     scale = Qb / torch.max(torch.abs(x))
     quant = (scale * x).round()
@@ -27,51 +13,37 @@ def absmax_quantize(x, bits=8):
 
 
 class BitLinear(nn.Module):
-    """
-    BitLinear layer for Transformer.
+    def __init__(self, in_features, out_features, groups=1):
+        super(BitLinear, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.groups = groups
+        self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
+        self.reset_parameters()
 
+    def reset_parameters(self):
+        nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
 
-    Args:
-        dim: int, dimension of the input.
+    def forward(self, input):
+        # Group Quantization and Normalization
+        weight = self.weight.view(self.groups, -1)
 
-    Returns:
-        tensor, output of the BitLinear layer.
+        weight = weight - weight.mean(dim=1, keepdim=True)
+        weight = torch.sign(weight)
 
-    Usage:
-        >>> x = torch.randn(10, 512)
-        >>> layer = BitLinear(512)
-        >>> y, dequant = layer(x)
-        >>> print(y, dequant)
+        beta = torch.abs(weight).sum(dim=1, keepdim=True) / (
+            weight.shape[0] * weight.shape[1]
+        )
 
-    """
+        weight = weight * beta
+        weight = weight.view(self.out_features, self.in_features)
 
-    def __init__(
-        self,
-        dim,
-    ):
-        super().__init__()
-        self.dim = dim
+        # Absmax Quantization
+        quant_input, _ = absmax_quantize(input)
 
-        self.norm = nn.LayerNorm(dim)
-        self.linear = nn.Linear(dim, dim)
-        self.abs_max_quantization = absmax_quantize
+        # Linear
+        output = F.linear(quant_input.float(), weight)
 
-    def forward(self, x):
-        """Forward pass of the BitLinear layer."""
-        x = self.norm(x)
-
-        # Binarize the weights
-        weight = self.linear.weight
-        weight_binarized = torch.sign(weight).char()
-
-        # Quantize the output
-        x, dequant = self.abs_max_quantization(x)
-
-        # Apply the linear operation with the binarized weights
-        x = F.linear(x, weight_binarized, self.linear.bias.char())
-
-        # Dequant the output
-        dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
-
-        # Return x, dequant # doesn't work returns tuple not tensor
-        return dequant
+        # Dequantization
+        output = output / beta.view(-1, 1)
+        return output

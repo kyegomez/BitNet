@@ -1,1 +1,2 @@
-from bitnet.bitlinear import BitLinear
+from bitnet.bitlinear import absmax_quantize, BitLinear
+from bitnet.transformer import BitNetTransformer    
