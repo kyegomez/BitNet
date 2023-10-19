@@ -89,15 +89,15 @@ class BitNetTransformer(nn.Module):
 
         """
         for attn, ff in self.layers:
-            q = self.bitlinear(x)
-            k = self.bitlinear(x)
-            v = self.bitlinear(x)
+            # q = self.bitlinear(x)
+            # k = self.bitlinear(x)
+            # v = self.bitlinear(x)
 
-            out, intermediates = attn(q, k, v, mask=mask)
+            out, intermediates = attn(x, x, x, mask=mask)
 
             x = out + x
 
-            x = self.bitlinear(x)
+            # x = self.bitlinear(x)
 
             x = ff(x) + x
 

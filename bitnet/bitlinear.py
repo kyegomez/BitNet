@@ -78,5 +78,5 @@ class BitLinear(nn.Module):
         # Dequant the output
         dequant = dequant * torch.norm(weight) / (self.dim**-0.5)
 
-        # Return x, dequant #doesn't work returns tuple not tensor
+        # Return x, dequant # doesn't work returns tuple not tensor
         return dequant

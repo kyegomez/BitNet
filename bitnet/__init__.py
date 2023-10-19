@@ -1,2 +1,2 @@
 from bitnet.bitlinear import BitLinear
-from bitnet.main import BitNetTransformer
+# from bitnet.main import BitNetTransformer
