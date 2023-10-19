@@ -1,15 +1,15 @@
 import torch
 
-from bitnet.bitlinear import BitLinear
+from bitnet.transformer import BitLinear
 
-# Random Inputs
+# Input
 x = torch.randn(10, 512)
+print(x)
 
-# BiLinear Layer
-layer = BitLinear(512)
+# BitLinear layer
+layer = BitLinear(512, 512)
 
-# Apply BiLinear Layer
-quantizate = layer(x)
+# Output
+y = layer(x)
 
-# Print
-print(quantizate)
+print(y)

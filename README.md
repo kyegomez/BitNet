@@ -8,6 +8,8 @@ Implementation of the "BitNet: Scaling 1-bit Transformers for Large Language Mod
 
 BitLinear = tensor -> layernorm -> Binarize -> abs max quantization 
 
+"The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement! 
+
 ## Installation
 `pip install bitnet`
 

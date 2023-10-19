@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 
-def absmax_quantize(x):
+def absmax_quantize(x, bits=8):
     """
     Absmax quantization function.
 
@@ -19,15 +19,10 @@ def absmax_quantize(x):
         >>> print(quant)
 
     """
-    # calculate scale
-    scale = 127 / torch.max(torch.abs(x))
-
-    # quantize
+    Qb = 2**(bits-1) - 1
+    scale = Qb / torch.max(torch.abs(x))
     quant = (scale * x).round()
-
-    # dequantize
     dequant = quant / scale
-
     return quant.to(torch.int8), dequant
 
 
