@@ -6,7 +6,7 @@ Implementation of the "BitNet: Scaling 1-bit Transformers for Large Language Mod
 
 [Paper link:](https://arxiv.org/pdf/2310.11453.pdf)
 
-BitLinear = tensor -> layernorm -> Binarize -> abs max quantization 
+BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 
 "The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement! 
 
@@ -70,5 +70,8 @@ Eprint = {arXiv:2310.11453},
 
 
 # Todo
-- [ ] Fix transformer pass error [issue](https://github.com/kyegomez/BitNet/issues/5)
-- [ ] Split up q, k, v in one line 
+- [ ] Double check BitLinear implementation and make sure it works exactly as in paper 
+- [ ] Implement training script for `BitNetTransformer`
+- [ ] Train on Enwiki8, copy and past code and data from Lucidrains repos
+- [ ] Benchmark peformance
+- [ ] Look into Straight Through Estimator for non-differentiable backprop
