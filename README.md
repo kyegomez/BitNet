@@ -34,22 +34,25 @@ print(y, dequant)
 ```
 ----
 
-<!-- - Running random inputs to a full BitNet Transformer as shown in paper:
+- Running random inputs to a full BitNet Transformer as shown in paper:
 ```python
-import torch 
-from bitnet.main import BitNetTransformer
+import torch
+from bitnet import BitNetTransformer
 
-#random inputs
-x = torch.randn(10, 512)
+bitnet = BitNetTransformer(
+    num_tokens=20000,
+    dim=512,
+    depth=6,
+    dim_head=64,
+    heads=8,
+    ff_mult=4,
+)
 
-#transformer layer
-model = BitNetTransformer(512, 8, 8, 64)
+tokens = torch.randint(0, 20000, (1, 512))
+logits = bitnet(tokens)
+print(logits.shape)
 
-#apply transformer
-y = model(x)
-
-print(y)
-``` -->
+```
 
 # License
 MIT
