@@ -73,5 +73,5 @@ Eprint = {arXiv:2310.11453},
 - [ ] Double check BitLinear implementation and make sure it works exactly as in paper 
 - [ ] Implement training script for `BitNetTransformer`
 - [ ] Train on Enwiki8, copy and past code and data from Lucidrains repos
-- [ ] Benchmark peformance
+- [ ] Benchmark performance
 - [ ] Look into Straight Through Estimator for non-differentiable backprop
