@@ -7,11 +7,13 @@ from bitnet.transformer import BitNetTransformer, ParallelTransformerBlock, Tran
 
 # Basic Tests:
 
+
 def test_absmax_quantize():
     tensor = torch.tensor([1.5, -2.0, 3.0, -4.0])
     quant, dequant = absmax_quantize(tensor)
     assert quant.dtype == torch.int8
     assert torch.allclose(dequant, tensor, atol=1e-2)
+
 
 def test_bitlinear_initialization():
     layer = BitLinear(10, 20)
@@ -19,19 +21,24 @@ def test_bitlinear_initialization():
     assert layer.out_features == 20
     assert layer.weight.shape == (20, 10)
 
+
 def test_bitlinear_forward():
     layer = BitLinear(10, 20)
     input_tensor = torch.randn(5, 10)
     output = layer(input_tensor)
     assert output.shape == (5, 20)
 
+
 # Fixtures:
+
 
 @pytest.fixture
 def random_tensor():
     return torch.randn(5, 10)
 
+
 # Parameterized Testing:
+
 
 @pytest.mark.parametrize("bits", [4, 8, 12, 16])
 def test_absmax_quantize_bits(random_tensor, bits):
@@ -39,17 +46,23 @@ def test_absmax_quantize_bits(random_tensor, bits):
     assert quant.dtype == torch.int8
     assert torch.allclose(dequant, random_tensor, atol=1e-2)
 
+
 # More Tests for BitLinear:
 
-@pytest.mark.parametrize("in_features,out_features", [(10, 20), (20, 40), (5, 10), (15, 10)])
+
+@pytest.mark.parametrize(
+    "in_features,out_features", [(10, 20), (20, 40), (5, 10), (15, 10)]
+)
 def test_bitlinear_shapes(in_features, out_features):
     layer = BitLinear(in_features, out_features)
     assert layer.weight.shape == (out_features, in_features)
+
 
 @pytest.mark.parametrize("groups", [1, 2, 5])
 def test_bitlinear_groups(groups):
     layer = BitLinear(10, 20, groups=groups)
     assert layer.groups == groups
+
 
 def test_bitlinear_reset_parameters():
     layer = BitLinear(10, 20)
@@ -57,17 +70,20 @@ def test_bitlinear_reset_parameters():
     layer.reset_parameters()
     assert not torch.equal(original_weights, layer.weight)
 
+
 @pytest.mark.parametrize("groups", [1, 2, 5])
 def test_bitlinear_forward_with_groups(random_tensor, groups):
     layer = BitLinear(10, 20, groups=groups)
     output = layer(random_tensor)
     assert output.shape == (5, 20)
 
+
 def test_bitlinear_zero_input():
     layer = BitLinear(10, 20)
     input_tensor = torch.zeros(5, 10)
     output = layer(input_tensor)
     assert torch.allclose(output, torch.zeros(5, 20), atol=1e-2)
+
 
 def test_bitlinear_weight_sign():
     layer = BitLinear(10, 20)
@@ -77,6 +93,7 @@ def test_bitlinear_weight_sign():
     output_after = layer(input_tensor)
     assert not torch.allclose(output_before, output_after)
 
+
 @pytest.mark.parametrize("groups", [1, 2, 5])
 def test_bitlinear_weight_group_normalization(groups):
     layer = BitLinear(10, 20, groups=groups)
@@ -84,18 +101,23 @@ def test_bitlinear_weight_group_normalization(groups):
     mean = weight.mean(dim=1, keepdim=True)
     assert torch.allclose(mean, torch.zeros_like(mean), atol=1e-2)
 
+
 def test_bitlinear_weight_group_scaling():
     layer = BitLinear(10, 20, groups=5)
     weight = layer.weight.view(layer.groups, -1)
-    beta = torch.abs(weight).sum(dim=1, keepdim=True) / (weight.shape[0] * weight.shape[1])
+    beta = torch.abs(weight).sum(dim=1, keepdim=True) / (
+        weight.shape[0] * weight.shape[1]
+    )
     scaled_weight = weight * beta
     assert torch.allclose(scaled_weight, layer.weight.view(20, 10))
+
 
 def test_bitlinear_input_quantization(random_tensor):
     layer = BitLinear(10, 20)
     quant_input, _ = absmax_quantize(random_tensor)
     output = layer(quant_input.float())
     assert output.shape == (5, 20)
+
 
 # ... Continue adding more tests ...
 # - Test the forward pass with extreme input values.

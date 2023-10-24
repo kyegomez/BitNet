@@ -1,15 +1,8 @@
-import gzip
-import random
-
 import numpy as np
 import torch
-import torch.optim as optim
-import tqdm
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, Dataset
 
-from bitnet.transformer import BitNetTransformer
 from bitnet.at import AutoregressiveWrapper
+from bitnet.transformer import BitNetTransformer
 
 # constants
 
@@ -44,11 +37,15 @@ def decode_tokens(tokens):
 model = BitNetTransformer(num_tokens=256, dim=512, depth=8)
 
 model = AutoregressiveWrapper(model, max_seq_len=SEQ_LEN)
-model.load_state_dict(torch.load('../model_checkpoint.pth'))
+model.load_state_dict(torch.load("../model_checkpoint.pth"))
 model.cuda()
 model.eval()
 
-inp = torch.from_numpy(np.fromstring("The dog jumped over the ", dtype=np.uint8)).long().to('cuda:0')
+inp = (
+    torch.from_numpy(np.fromstring("The dog jumped over the ", dtype=np.uint8))
+    .long()
+    .to("cuda:0")
+)
 
 sample = model.generate(inp[None, ...], GENERATE_LENGTH)
 output_str = decode_tokens(sample[0])

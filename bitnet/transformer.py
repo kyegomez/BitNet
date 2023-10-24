@@ -203,4 +203,3 @@ class BitNetTransformer(nn.Module):
         x = self.emb(x)
         x = self.transformer(x)
         return self.to_logits(x)
-
