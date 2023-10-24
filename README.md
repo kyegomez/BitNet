@@ -8,7 +8,7 @@ Implementation of the "BitNet: Scaling 1-bit Transformers for Large Language Mod
 
 BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 
-"The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement! 
+"The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement just swap out the linears with the BitLinear modules! 
 
 ## **NEWS**
 - BitNet Transformer has been trained using the `train.py` file that trains on enwiki8 a small 1gb dataset of wikipedia: [HERE IS THE LINK](https://drive.google.com/file/d/1gBuZRFBqMV3cVD902LXA_hmZl4e0dLyY/view)
@@ -59,64 +59,12 @@ print(logits.shape)
 
 ## Inference
 ```python
+from bitnet import BitNetInference
 
-import gzip
-import random
-
-import numpy as np
-import torch
-import torch.optim as optim
-import tqdm
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, Dataset
-
-from bitnet.transformer import BitNetTransformer
-from bitnet.at import AutoregressiveWrapper
-
-# constants
-
-NUM_BATCHES = int(1e5)
-BATCH_SIZE = 4
-GRADIENT_ACCUMULATE_EVERY = 4
-LEARNING_RATE = 2e-4
-VALIDATE_EVERY = 100
-GENERATE_EVERY = 500
-GENERATE_LENGTH = 512
-SEQ_LEN = 1024
-
-# helpers
-
-
-def cycle(loader):
-    while True:
-        for data in loader:
-            yield data
-
-
-def decode_token(token):
-    return str(chr(max(32, token)))
-
-
-def decode_tokens(tokens):
-    return "".join(list(map(decode_token, tokens)))
-
-
-# instantiate GPT-like decoder model
-
-model = BitNetTransformer(num_tokens=256, dim=512, depth=8)
-
-model = AutoregressiveWrapper(model, max_seq_len=SEQ_LEN)
-model.load_state_dict(torch.load('../model_checkpoint.pth'))
-model.cuda()
-model.eval()
-
-inp = torch.from_numpy(np.fromstring("The dog jumped over the ", dtype=np.uint8)).long().to('cuda:0')
-
-sample = model.generate(inp[None, ...], GENERATE_LENGTH)
-output_str = decode_tokens(sample[0])
+bitnet = BitNetInference()
+bitnet.load_model('../model_checkpoint.pth') #Download model
+output_str = bitnet.generate("The dog jumped over the ", 512)
 print(output_str)
-
-
 
 ```
 
