@@ -13,6 +13,10 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 ## **NEWS**
 - BitNet Transformer has been trained using the `train.py` file that trains on enwiki8 a small 1gb dataset of wikipedia: [HERE IS THE LINK](https://drive.google.com/file/d/1gBuZRFBqMV3cVD902LXA_hmZl4e0dLyY/view)
 
+## Appreciation
+- Dimitry, Nullonix for analysis and code review and revision
+- Vyom, for providing 4080 to train!
+
 ## Installation
 `pip install bitnet`
 
