@@ -1,8 +1,8 @@
-import torch
 from torch import nn
-from zeta.nn.attention import MultiQueryAttention
+from zeta.nn.attention import MultiheadAttention
 from bitnet.bitffn import BitFeedForward
 from zeta.nn import RMSNorm
+
 # helpers
 
 
@@ -24,7 +24,7 @@ class Transformer(nn.Module):
         
         for _ in range(depth):    
             self.layers.append(
-                MultiQueryAttention(d_model=dim, heads=heads)
+                MultiheadAttention(dim, heads)
             )
             
             self.ffn_layers.append(
@@ -34,7 +34,7 @@ class Transformer(nn.Module):
 
     def forward(self, x):
         for attn, ffn in zip(self.layers, self.ffn_layers):
-            x, _, _ = attn(x, x, x) + x
+            x = attn(x, x, x) + x
             x = ffn(x) + x
         return x
 
