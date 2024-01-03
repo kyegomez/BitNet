@@ -4,12 +4,12 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "bitnet"
-version = "0.0.7"
+version = "0.0.8"
 description = "bitnet - Pytorch"
 license = "MIT"
 authors = ["Kye Gomez <kye@apac.ai>"]
 homepage = "https://github.com/kyegomez/bitnet"
-documentation = ""  # Add this if you have documentation.
+documentation = "https://github.com/kyegomez/bitnet"  # Add this if you have documentation.
 readme = "README.md"  # Assuming you have a README.md
 repository = "https://github.com/kyegomez/bitnet"
 keywords = ["artificial intelligence", "deep learning", "optimizers", "Prompt Engineering"]
@@ -26,6 +26,7 @@ python = "^3.6"
 torch = "*"
 einops = "*"
 zetascale = "*"
+
 
 
 
