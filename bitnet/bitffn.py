@@ -18,6 +18,15 @@ class BitFeedForward(nn.Module):
 
     Methods:
         forward(x: Tensor) -> Tensor: Performs the forward pass of the BitFeedForward module.
+        
+    Examples:
+        >>> import torch
+        >>> from bitnet.bitffn import BitFeedForward
+        >>> x = torch.randn(10, 512)
+        >>> ff = BitFeedForward(512)
+        >>> y = ff(x)
+        >>> y.shape
+        torch.Size([10, 512])
 
     """
 

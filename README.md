@@ -21,6 +21,8 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 `pip install bitnet`
 
 ## Usage:
+
+### `BitLinear`
 - Example of the BitLinear layer which is the main innovation of the paper!
 ```python
 import torch
@@ -41,7 +43,11 @@ print(y)
 ```
 ----
 
-- Running random inputs to a full BitNet Transformer as shown in paper:
+### `BitNetTransformer`
+- Fully implemented Transformer as described in the diagram with MHA, and BitFeedforwards
+- Can be utilized not just for text but for images and maybe even video or audio processing
+- Complete with residuals and skip connections for gradient flow
+
 ```python
 import torch
 from bitnet import BitNetTransformer
@@ -59,6 +65,28 @@ tokens = torch.randint(0, 20000, (1, 512))
 logits = bitnet(tokens)
 print(logits.shape)
 
+```
+
+### `BitFeedForward`
+- Feedforward as shown in the diagram with BitLinear and a GELU:
+- Linear -> GELU -> Linear
+- You can add dropouts, or layernorms, or other layers for a better ffn
+
+```python
+import torch
+from bitnet.bitffn import BitFeedForward
+
+# Random input
+x = torch.randn(10, 512)
+
+# FFN
+ff = BitFeedForward(512)
+
+# Apply FFN
+y = ff(x)
+
+print(y.shape)
+# torch.Size([10, 512])
 ```
 
 ## Inference
@@ -88,8 +116,11 @@ Eprint = {arXiv:2310.11453},
 
 
 # Todo
-- [ ] Double check BitLinear implementation and make sure it works exactly as in paper 
+- [x] Double check BitLinear implementation and make sure it works exactly as in paper 
 - [x] Implement training script for `BitNetTransformer`
 - [x] Train on Enwiki8, copy and past code and data from Lucidrains repos
 - [x] Benchmark performance
 - [x] Look into Straight Through Estimator for non-differentiable backprop
+- [x] Implement BitFeedForward
+- [x] Clean up codebase 
+- [x] Add unit tests for each module
