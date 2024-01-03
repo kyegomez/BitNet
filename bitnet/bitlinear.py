@@ -1,49 +1,78 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
-import math
-
-
-def absmax_quantize(x, bits=8):
-    Qb = 2 ** (bits - 1) - 1
-    scale = Qb / torch.max(torch.abs(x))
-    quant = (scale * x).round()
-    dequant = quant / scale
-    return quant.to(torch.int8), dequant
+from torch import nn
 
 
 class BitLinear(nn.Module):
-    def __init__(self, in_features, out_features, groups=1):
+    """
+    BitLinear module as described in the BitNet architecture.
+
+    This module performs a linear transformation with 1-bit quantized weights.
+    The transformation includes a quantization step, matrix multiplication,
+    and a subsequent dequantization step. Both the quantization and
+    dequantization steps utilize learnable parameters gamma and beta.
+
+    Attributes:
+    - in_features: size of each input sample
+    - out_features: size of each output sample
+    - gamma: scaling factor for absmax quantization (learnable parameter)
+    - beta: scaling factor for dequantization (learnable parameter)
+    - weight: the 1-bit quantized weights of the linear transformation
+    - bias: the bias term for the linear transformation (optional)
+    """
+
+    def __init__(self, in_features, out_features, bias=True):
+        """
+        Initializes the BitLinear module.
+
+        Parameters:
+        - in_features: An integer, the number of input features.
+        - out_features: An integer, the number of output features.
+        - bias: A boolean, whether the layer includes a bias.
+        """
         super(BitLinear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.groups = groups
-        self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
-        self.reset_parameters()
 
-    def reset_parameters(self):
-        nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+        # Initialize weights and bias
+        self.weight = nn.Parameter(torch.randn(out_features, in_features))
+        if bias:
+            self.bias = nn.Parameter(torch.randn(out_features))
+        else:
+            self.register_parameter("bias", None)
+
+        # Learnable parameters for quantization and dequantization
+        self.gamma = nn.Parameter(torch.ones(in_features))
+        self.beta = nn.Parameter(torch.ones(out_features))
 
     def forward(self, input):
-        # Group Quantization and Normalization
-        weight = self.weight.view(self.groups, -1)
+        """
+        Forward pass of the BitLinear module.
 
-        weight = weight - weight.mean(dim=1, keepdim=True)
-        weight = torch.sign(weight)
+        Parameters:
+        - input: A tensor of shape (batch_size, in_features).
 
-        beta = torch.abs(weight).sum(dim=1, keepdim=True) / (
-            weight.shape[0] * weight.shape[1]
-        )
-
-        weight = weight * beta
-        weight = weight.view(self.out_features, self.in_features)
+        Returns:
+        - output: A tensor of shape (batch_size, out_features).
+        """
+        # Apply Layer Normalization
+        input_norm = F.layer_norm(input, (self.in_features,))
 
         # Absmax Quantization
-        quant_input, _ = absmax_quantize(input)
+        quant_scale = torch.max(torch.abs(input_norm), dim=1, keepdim=True).values
+        input_quant = torch.sign(input_norm) * (quant_scale / self.gamma)
 
-        # Linear
-        output = F.linear(quant_input.float(), weight)
+        # 1-bit Weights Quantization
+        weight_quant = torch.sign(self.weight)
 
-        # Dequantization
-        output = output / beta.view(-1, 1)
+        # MatMul with 1-bit weights using torch.matmul for explicit operation
+        output = torch.matmul(input_quant, weight_quant.t())
+
+        # Adding bias if it exists
+        if self.bias is not None:
+            output += self.bias.unsqueeze(0).expand_as(output)
+
+        # Dequantization with learnable parameters
+        output = output * self.beta.unsqueeze(0).expand_as(output)
+
         return output

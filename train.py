@@ -5,7 +5,6 @@ import numpy as np
 import torch
 import torch.optim as optim
 import tqdm
-from torch.nn import functional as F
 from torch.utils.data import DataLoader, Dataset
 
 from bitnet.transformer import BitNetTransformer
@@ -102,7 +101,7 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
         model.eval()
         inp = random.choice(val_dataset)[:-1]
         prime = decode_tokens(inp)
-        print(f"%s \n\n %s", (prime, "*" * 100))
+        print("%s \n\n %s", (prime, "*" * 100))
 
         sample = model.generate(inp[None, ...], GENERATE_LENGTH)
         output_str = decode_tokens(sample[0])
