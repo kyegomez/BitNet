@@ -24,13 +24,13 @@ class BitFeedForward(nn.Module):
     def __init__(self, dim: int, ff_mult: int = 4, *args, **kwargs):
         super(BitFeedForward, self).__init__()
         hidden_dim = dim * ff_mult
-        
+
         self.layer = nn.Sequential(
             BitLinear(dim, hidden_dim, *args, **kwargs),
             nn.GELU(),
             BitLinear(hidden_dim, dim, *args, **kwargs),
         )
-        
+
     def forward(self, x: Tensor) -> Tensor:
         """
         Performs the forward pass of the BitFeedForward module.

@@ -8,29 +8,17 @@ from zeta.nn import RMSNorm
 
 # [TRANSFORMER] Transformer
 class Transformer(nn.Module):
-    def __init__(
-        self,
-        dim: int,
-        heads: int,
-        depth: int,
-        ff_mult=2,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, dim: int, heads: int, depth: int, ff_mult=2, *args, **kwargs):
         super().__init__()
         self.layers = nn.ModuleList([])
         self.ffn_layers = nn.ModuleList([])
-        
-        
-        for _ in range(depth):    
-            self.layers.append(
-                MultiheadAttention(dim, heads)
-            )
-            
+
+        for _ in range(depth):
+            self.layers.append(MultiheadAttention(dim, heads))
+
             self.ffn_layers.append(
                 BitFeedForward(dim=dim, ff_mult=ff_mult),
             )
-            
 
     def forward(self, x):
         for attn, ffn in zip(self.layers, self.ffn_layers):
@@ -52,7 +40,9 @@ class BitNetTransformer(nn.Module):
         super().__init__()
         self.emb = nn.Embedding(num_tokens, dim)
 
-        self.transformer = Transformer(dim=dim, depth=depth, heads=heads, ff_mult=ff_mult)
+        self.transformer = Transformer(
+            dim=dim, depth=depth, heads=heads, ff_mult=ff_mult
+        )
 
         self.to_logits = nn.Sequential(RMSNorm(dim), nn.Linear(dim, num_tokens))
 
@@ -60,5 +50,3 @@ class BitNetTransformer(nn.Module):
         x = self.emb(x)
         x = self.transformer(x)
         return self.to_logits(x)
-    
-    
