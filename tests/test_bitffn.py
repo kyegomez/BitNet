@@ -1,4 +1,4 @@
-import torch 
+import torch
 from bitnet.bitffn import BitFeedForward
 from bitnet.bitlinear import BitLinear
 from torch import nn
@@ -13,6 +13,7 @@ def test_bitfeedforward_initialization():
     assert isinstance(bitffn.layer[2], BitLinear)
     assert bitffn.layer[0].out_features == 512 * 4
     assert bitffn.layer[2].in_features == 512 * 4
+
 
 def test_bitfeedforward_forward_pass():
     bitffn = BitFeedForward(dim=512, ff_mult=4)

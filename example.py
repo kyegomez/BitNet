@@ -1,6 +1,6 @@
 import torch
 
-from bitnet.transformer import BitLinear
+from bitnet import BitLinear
 
 # Input
 x = torch.randn(10, 512)
