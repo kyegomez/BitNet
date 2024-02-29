@@ -81,9 +81,9 @@ class BitLinear15b(nn.Module):
         )
 
 
-# Initialize the BitLinear layer
-bit_linear = BitLinear15b(in_features=128, out_features=64)
-# Example input tensor
-x = torch.randn(10, 128)  # Example input
-output = bit_linear(x)  # Forward pass
-print(output)
+# # Initialize the BitLinear layer
+# bit_linear = BitLinear15b(in_features=128, out_features=64)
+# # Example input tensor
+# x = torch.randn(10, 128)  # Example input
+# output = bit_linear(x)  # Forward pass
+# print(output)
