@@ -99,6 +99,22 @@ output_str = bitnet.generate("The dog jumped over the ", 512)
 print(output_str)
 ```
 
+## Huggingface Usage
+```python
+from bitnet import replace_linears_in_hf
+from transformers import AutoModel
+
+# Load a model from Hugging Face's Transformers
+model_name = "bert-base-uncased"  # Example model
+model = AutoModel.from_pretrained(model_name)
+
+# Replace its Linear layers with BitLinear
+replace_linears_in_hf(model)
+
+# Now, `model` has its Linear layers replaced with BitLinear
+print(model)
+```
+
 # License
 MIT
 
