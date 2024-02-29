@@ -9,8 +9,8 @@ from torch.utils.data import DataLoader, Dataset
 
 from bitnet.at import AutoregressiveWrapper
 from bitnet.transformer import BitNetTransformer
-from zeta.optim import StableAdamWUnfused, DecoupledLionW8Bit
-from torch.optim import Adam
+from zeta.optim import StableAdamWUnfused
+
 # constants
 
 NUM_BATCHES = int(1e5)
@@ -82,7 +82,7 @@ train_loader = cycle(DataLoader(train_dataset, batch_size=BATCH_SIZE))
 val_loader = cycle(DataLoader(val_dataset, batch_size=BATCH_SIZE))
 
 # optimizer
-optim = Adam(
+optim = StableAdamWUnfused(
     model.parameters(),
     lr=LEARNING_RATE,
 )
@@ -94,7 +94,7 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
 
     for __ in range(GRADIENT_ACCUMULATE_EVERY):
         loss = model(next(train_loader))
-        loss.backward()
+        loss.mean().backward()
 
     print(f"training loss: {loss.item()}")
     torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
