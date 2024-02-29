@@ -2,7 +2,7 @@
 
 # BitNet
 ![bitnet](/bitnet.png)
-Implementation of the "BitNet: Scaling 1-bit Transformers for Large Language Models"
+PyTorch Implementation of the linear methods and model from the paper "BitNet: Scaling 1-bit Transformers for Large Language Models"
 
 [Paper link:](https://arxiv.org/pdf/2310.11453.pdf)
 
