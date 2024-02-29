@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 from bitnet.at import AutoregressiveWrapper
 from bitnet.transformer import BitNetTransformer
 from zeta.optim import StableAdamWUnfused, DecoupledLionW8Bit
-
+from torch.optim import Adam
 # constants
 
 NUM_BATCHES = int(1e5)
@@ -82,7 +82,7 @@ train_loader = cycle(DataLoader(train_dataset, batch_size=BATCH_SIZE))
 val_loader = cycle(DataLoader(val_dataset, batch_size=BATCH_SIZE))
 
 # optimizer
-optim = DecoupledLionW8Bit(
+optim = Adam(
     model.parameters(),
     lr=LEARNING_RATE,
 )
