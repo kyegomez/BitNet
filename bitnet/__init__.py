@@ -11,5 +11,5 @@ __all__ = [
     "BitNetInference",
     "BitFeedForward",
     "replace_linears_in_hf",
-    "BitLinear15b"
+    "BitLinear15b",
 ]

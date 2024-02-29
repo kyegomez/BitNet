@@ -1,9 +1,10 @@
 from torch import nn
-from bitnet.bitbnet_b158 import BitLinear15b
-from transformers import AutoModel
+from bitnet.bitlinear import BitLinear
 
 
-def replace_linears_in_hf(model):
+def replace_linears_in_hf(
+    model,
+):
     """
     Replaces all instances of nn.Linear in the given model with BitLinear15b.
 
@@ -19,7 +20,7 @@ def replace_linears_in_hf(model):
             setattr(
                 model,
                 name,
-                BitLinear15b(
+                BitLinear(
                     in_features=module.in_features,
                     out_features=module.out_features,
                     bias=module.bias is not None,

@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from bitnet.at import AutoregressiveWrapper
 from bitnet.transformer import BitNetTransformer
+from zeta.optim import StableAdamWUnfused
 
 # constants
 
@@ -81,8 +82,10 @@ train_loader = cycle(DataLoader(train_dataset, batch_size=BATCH_SIZE))
 val_loader = cycle(DataLoader(val_dataset, batch_size=BATCH_SIZE))
 
 # optimizer
-
-optim = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+optim = StableAdamWUnfused(
+    model.parameters(),
+    lr=LEARNING_RATE,
+)
 
 # training
 

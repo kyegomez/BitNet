@@ -1,12 +1,42 @@
+import torch 
 from torch import nn
-from zeta.nn import RMSNorm
-from zeta.nn.attention import MultiheadAttention
-
+from zeta.nn import MultiheadAttention
+import torch.nn.functional as F
 from bitnet.bitffn import BitFeedForward
 
+def l2norm(t, dim = -1):
+    return F.normalize(t, dim = dim)
 
-# [TRANSFORMER] Transformer
+
+class RMSNorm(nn.Module):
+    def __init__(self, dim, affine = True):
+        super().__init__()
+        self.scale = dim ** 0.5
+        self.gamma = nn.Parameter(torch.ones(dim)) if affine else 1.
+
+    def forward(self, x):
+        return l2norm(x) * self.gamma * self.scale
+
+
 class Transformer(nn.Module):
+    """
+    Transformer module that applies multi-head attention and feed-forward layers.
+
+    Args:
+        dim (int): The dimension of the input and output tensors.
+        heads (int): The number of attention heads.
+        depth (int): The number of transformer layers.
+        ff_mult (int, optional): The multiplier for the hidden dimension in the feed-forward layers.
+            Defaults to 2.
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        layers (nn.ModuleList): List of multi-head attention layers.
+        ffn_layers (nn.ModuleList): List of feed-forward layers.
+
+    """
+
     def __init__(self, dim: int, heads: int, depth: int, ff_mult=2, *args, **kwargs):
         super().__init__()
         self.layers = nn.ModuleList([])
@@ -28,6 +58,17 @@ class Transformer(nn.Module):
 
 # [MAIN MODEL] BitNetTransformer
 class BitNetTransformer(nn.Module):
+    """
+    BitNetTransformer is a transformer-based model for BitNet.
+
+    Args:
+        dim (int): The dimension of the token embeddings.
+        depth (int): The number of transformer layers.
+        num_tokens (int): The number of tokens in the vocabulary.
+        heads (int, optional): The number of attention heads in the transformer. Defaults to 8.
+        ff_mult (int, optional): The multiplier for the feed-forward layer dimension. Defaults to 4.
+    """
+
     def __init__(
         self,
         dim: int,

@@ -26,7 +26,7 @@ class BitLinear15b(nn.Module):
     Weights are quantized to -1, 0, or +1 using an absmean quantization approach.
     """
 
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features, out_features, bias):
         """
         Initializes the BitLinear layer.
 
@@ -37,6 +37,7 @@ class BitLinear15b(nn.Module):
         super(BitLinear15b, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
+        self.bias = bias
         self.weight = nn.Parameter(torch.randn(out_features, in_features))
         self.eps = 1e-6  # Small epsilon for numerical stability
 
