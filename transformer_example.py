@@ -1,4 +1,5 @@
 import torch
+
 from bitnet import BitNetTransformer
 
 # Create a random tensor of integers

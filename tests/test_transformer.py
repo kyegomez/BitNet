@@ -1,5 +1,6 @@
 import torch
-from bitnet.transformer import BitNetTransformer, MultiheadAttention, BitFeedForward
+
+from bitnet.transformer import BitFeedForward, BitNetTransformer, MultiheadAttention
 
 
 def test_bitnet_transformer_initialization():

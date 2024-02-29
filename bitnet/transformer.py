@@ -1,9 +1,8 @@
 from torch import nn
-from zeta.nn.attention import MultiheadAttention
-from bitnet.bitffn import BitFeedForward
 from zeta.nn import RMSNorm
+from zeta.nn.attention import MultiheadAttention
 
-# helpers
+from bitnet.bitffn import BitFeedForward
 
 
 # [TRANSFORMER] Transformer

@@ -30,7 +30,7 @@ class BitLinear(nn.Module):
         - out_features: An integer, the number of output features.
         - bias: A boolean, whether the layer includes a bias.
         """
-        super(BitLinear, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
 

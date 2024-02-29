@@ -1,7 +1,8 @@
 import torch
+from torch import nn
+
 from bitnet.bitffn import BitFeedForward
 from bitnet.bitlinear import BitLinear
-from torch import nn
 
 
 def test_bitfeedforward_initialization():

@@ -39,7 +39,6 @@ layer = BitLinear(512, 400)
 y = layer(x)
 
 print(y)
-
 ```
 ----
 
@@ -50,6 +49,7 @@ print(y)
 
 ```python
 import torch
+
 from bitnet import BitNetTransformer
 
 bitnet = BitNetTransformer(
@@ -64,7 +64,6 @@ bitnet = BitNetTransformer(
 tokens = torch.randint(0, 20000, (1, 512))
 logits = bitnet(tokens)
 print(logits.shape)
-
 ```
 
 ### `BitFeedForward`
@@ -74,6 +73,7 @@ print(logits.shape)
 
 ```python
 import torch
+
 from bitnet.bitffn import BitFeedForward
 
 # Random input
@@ -94,10 +94,9 @@ print(y.shape)
 from bitnet import BitNetInference
 
 bitnet = BitNetInference()
-bitnet.load_model('../model_checkpoint.pth') #Download model
+bitnet.load_model("../model_checkpoint.pth")  # Download model
 output_str = bitnet.generate("The dog jumped over the ", 512)
 print(output_str)
-
 ```
 
 # License

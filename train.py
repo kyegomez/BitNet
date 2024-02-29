@@ -7,8 +7,8 @@ import torch.optim as optim
 import tqdm
 from torch.utils.data import DataLoader, Dataset
 
-from bitnet.transformer import BitNetTransformer
 from bitnet.at import AutoregressiveWrapper
+from bitnet.transformer import BitNetTransformer
 
 # constants
 
@@ -26,8 +26,7 @@ SEQ_LEN = 1024
 
 def cycle(loader):
     while True:
-        for data in loader:
-            yield data
+        yield from loader
 
 
 def decode_token(token):

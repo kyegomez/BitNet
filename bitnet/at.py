@@ -48,7 +48,7 @@ class AutoregressiveWrapper(nn.Module):
         eos_token=None,
         temperature=1.0,
         filter_thres=0.9,
-        **kwargs
+        **kwargs,
     ):
         b, t, device = *start_tokens.shape, start_tokens.device
 

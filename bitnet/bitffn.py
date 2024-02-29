@@ -31,7 +31,7 @@ class BitFeedForward(nn.Module):
     """
 
     def __init__(self, dim: int, ff_mult: int = 4, *args, **kwargs):
-        super(BitFeedForward, self).__init__()
+        super().__init__()
         hidden_dim = dim * ff_mult
 
         self.layer = nn.Sequential(
