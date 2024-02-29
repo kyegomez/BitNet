@@ -105,7 +105,7 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
         model.eval()
         with torch.no_grad():
             loss = model(next(val_loader))
-            print(f"validation loss: {loss.item()}")
+            print(f"validation loss: {loss.mean().item()}")
 
     if i % GENERATE_EVERY == 0:
         model.eval()
