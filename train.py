@@ -42,6 +42,14 @@ def decode_tokens(tokens):
 model = BitNetTransformer(num_tokens=256, dim=512, depth=8)
 
 model = AutoregressiveWrapper(model, max_seq_len=SEQ_LEN)
+
+
+# Use all available GPUs
+if torch.cuda.device_count() > 1:
+    print("Using", torch.cuda.device_count(), "GPUs!")
+    model = torch.nn.DataParallel(model)
+
+
 model.cuda()
 
 # prepare enwik8 data
