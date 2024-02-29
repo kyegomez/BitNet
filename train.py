@@ -6,10 +6,10 @@ import torch
 import torch.optim as optim
 import tqdm
 from torch.utils.data import DataLoader, Dataset
+from zeta.optim import StableAdamWUnfused
 
 from bitnet.at import AutoregressiveWrapper
 from bitnet.transformer import BitNetTransformer
-from zeta.optim import StableAdamWUnfused
 
 # constants
 
@@ -88,7 +88,6 @@ optim = StableAdamWUnfused(
 )
 
 # training
-
 for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
     model.train()
 

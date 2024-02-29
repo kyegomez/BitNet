@@ -1,7 +1,8 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 from zeta.nn import MultiheadAttention
-import torch.nn.functional as F
+
 from bitnet.bitffn import BitFeedForward
 
 

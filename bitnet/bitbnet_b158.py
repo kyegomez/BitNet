@@ -1,7 +1,6 @@
 import torch
-from torch import nn, Tensor
 import torch.nn.functional as F
-import torch
+from torch import Tensor, nn
 
 
 def absmax_quantize(x: Tensor, bits: int = 8):
@@ -34,7 +33,7 @@ class BitLinear15b(nn.Module):
             in_features (int): Number of input features.
             out_features (int): Number of output features.
         """
-        super(BitLinear15b, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.bias = bias

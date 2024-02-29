@@ -102,9 +102,9 @@ print(output_str)
 ## Huggingface Usage
 ```python
 import torch
-from bitnet import replace_linears_in_hf
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from bitnet import replace_linears_in_hf
 
 # Load a model from Hugging Face's Transformers
 model_name = "bert-base-uncased"
@@ -116,7 +116,9 @@ replace_linears_in_hf(model)
 
 # Example text to classify
 text = "Replace this with your text"
-inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+inputs = tokenizer(
+    text, return_tensors="pt", padding=True, truncation=True, max_length=512
+)
 
 # Perform inference
 model.eval()  # Set the model to evaluation mode
