@@ -22,9 +22,8 @@ GENERATE_EVERY = 500
 GENERATE_LENGTH = 512
 SEQ_LEN = 1024
 
+
 # helpers
-
-
 def cycle(loader):
     while True:
         yield from loader
@@ -39,9 +38,7 @@ def decode_tokens(tokens):
 
 
 # instantiate GPT-like decoder model
-
 model = BitNetTransformer(num_tokens=256, dim=512, depth=8)
-
 model = AutoregressiveWrapper(model, max_seq_len=SEQ_LEN)
 
 
@@ -54,7 +51,6 @@ if torch.cuda.device_count() > 1:
 model.cuda()
 
 # prepare enwik8 data
-
 with gzip.open("./data/enwik8.gz") as file:
     X = np.fromstring(file.read(int(95e6)), dtype=np.uint8)
     trX, vaX = np.split(X, [int(90e6)])
