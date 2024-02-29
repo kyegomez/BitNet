@@ -13,7 +13,9 @@ replace_linears_in_hf(model)
 
 # Example text to classify
 text = "Replace this with your text"
-inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+inputs = tokenizer(
+    text, return_tensors="pt", padding=True, truncation=True, max_length=512
+)
 
 # Perform inference
 model.eval()  # Set the model to evaluation mode

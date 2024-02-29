@@ -1,18 +1,19 @@
-import torch 
+import torch
 from torch import nn
 from zeta.nn import MultiheadAttention
 import torch.nn.functional as F
 from bitnet.bitffn import BitFeedForward
 
-def l2norm(t, dim = -1):
-    return F.normalize(t, dim = dim)
+
+def l2norm(t, dim=-1):
+    return F.normalize(t, dim=dim)
 
 
 class RMSNorm(nn.Module):
-    def __init__(self, dim, affine = True):
+    def __init__(self, dim, affine=True):
         super().__init__()
-        self.scale = dim ** 0.5
-        self.gamma = nn.Parameter(torch.ones(dim)) if affine else 1.
+        self.scale = dim**0.5
+        self.gamma = nn.Parameter(torch.ones(dim)) if affine else 1.0
 
     def forward(self, x):
         return l2norm(x) * self.gamma * self.scale
