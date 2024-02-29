@@ -113,6 +113,6 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
         prime = decode_tokens(inp)
         print("%s \n\n %s", (prime, "*" * 100))
 
-        sample = model.generate(inp[None, ...], GENERATE_LENGTH)
+        sample = model.module.generate(inp[None, ...], GENERATE_LENGTH)
         output_str = decode_tokens(sample[0])
         print(output_str)
