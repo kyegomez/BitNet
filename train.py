@@ -3,13 +3,12 @@ import random
 
 import numpy as np
 import torch
-import torch.optim as optim
 import tqdm
 from torch.utils.data import DataLoader, Dataset
 from zeta.optim import StableAdamWUnfused
 
 from bitnet.at import AutoregressiveWrapper
-from bitnet.transformer import BitNetTransformer
+from bitnet.bit_transformer import BitNetTransformer
 
 # constants
 

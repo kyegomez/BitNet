@@ -8,7 +8,7 @@ x = torch.randn(1, 10, 512)
 gqa = BitMGQA(512, 8, 4)
 
 # Pass the input tensor through the BitMGQA model and get the output and attention weights
-out, attn = gqa(x, x, x, need_weights=True)
+out, _ = gqa(x, x, x, need_weights=True)
 
 # Print the shapes of the output tensor and attention tensor
-print(out.shape, attn.shape)
+print(out)

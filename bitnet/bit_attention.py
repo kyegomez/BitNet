@@ -291,7 +291,7 @@ class BitMGQA(nn.Module):
         k = rearrange(k, "b n (h d) -> b n h d", h=self.kv_heads)
         v = rearrange(v, "b n (h d) -> b n h d", h=self.kv_heads)
         # Apply attention, then fold 'h' attention heads back into 'd'.
-        x, attn = scaled_dot_product_gqa(
+        x, attn_weights = scaled_dot_product_gqa(
             query=q,
             key=k,
             value=v,
@@ -315,7 +315,7 @@ class BitMGQA(nn.Module):
         # Linear projection on attention outputs.
         x = self.out_proj(x)
 
-        return x, attn
+        return x, attn_weights
 
 
 # x = torch.randn(1, 10, 512)

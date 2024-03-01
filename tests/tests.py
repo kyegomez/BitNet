@@ -3,7 +3,11 @@ import torch
 from torch.nn import functional as F
 
 from bitnet.bitlinear import BitLinear, absmax_quantize
-from bitnet.transformer import BitNetTransformer, ParallelTransformerBlock, Transformer
+from bitnet.bit_transformer import (
+    BitNetTransformer,
+    ParallelTransformerBlock,
+    Transformer,
+)
 
 # Basic Tests:
 

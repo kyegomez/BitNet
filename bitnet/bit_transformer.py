@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch import nn
 
-from bitnet.bitffn import BitFeedForward
+from bitnet.bit_ffn import BitFeedForward
 from bitnet.bit_attention import BitMGQA
 
 
@@ -54,7 +54,7 @@ class Transformer(nn.Module):
 
     """
 
-    def __init__(self, dim: int, heads: int, depth: int, ff_mult=2, *args, **kwargs):
+    def __init__(self, dim: int, heads: int, depth: int, ff_mult: int = 2, *args, **kwargs):
         super().__init__()
         self.layers = nn.ModuleList([])
         self.ffn_layers = nn.ModuleList([])

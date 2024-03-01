@@ -30,15 +30,3 @@ def replace_linears_in_hf(
         else:
             # Recursively apply to child modules
             replace_linears_in_hf(module)
-
-
-# # Example usage:
-# # Load a model from Hugging Face's Transformers
-# model_name = "bert-base-uncased"  # Example model
-# model = AutoModel.from_pretrained(model_name)
-
-# # Replace its Linear layers with BitLinear
-# replace_linears_in_hf(model)
-
-# # Now, `model` has its Linear layers replaced with BitLinear
-# print(model)

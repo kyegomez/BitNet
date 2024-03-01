@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from bitnet.at import AutoregressiveWrapper
-from bitnet.transformer import BitNetTransformer
+from bitnet.bit_transformer import BitNetTransformer
 
 
 class BitNetInference:
