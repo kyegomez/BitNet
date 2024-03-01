@@ -1,78 +1,116 @@
 import torch
-import torch.nn.functional as F
-from torch import nn
+from torch import Tensor, nn
 
 
-class BitLinear(nn.Module):
+class BitLinear(nn.Linear):
     """
-    BitLinear module as described in the BitNet architecture.
+    BitLinear is a custom linear layer that performs binarization of weights and quantization of activations
+    in a group-wise manner.
 
-    This module performs a linear transformation with 1-bit quantized weights.
-    The transformation includes a quantization step, matrix multiplication,
-    and a subsequent dequantization step. Both the quantization and
-    dequantization steps utilize learnable parameters gamma and beta.
-
-    Attributes:
-    - in_features: size of each input sample
-    - out_features: size of each output sample
-    - gamma: scaling factor for absmax quantization (learnable parameter)
-    - beta: scaling factor for dequantization (learnable parameter)
-    - weight: the 1-bit quantized weights of the linear transformation
-    - bias: the bias term for the linear transformation (optional)
+    Args:
+        in_features (int): Number of input features.
+        out_features (int): Number of output features.
+        bias (bool, optional): If set to False, the layer will not learn an additive bias. Default is True.
+        num_groups (int, optional): Number of groups to divide the weights and activations into. Default is 1.
     """
 
-    def __init__(self, in_features, out_features, bias=True):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        bias: bool = True,
+        num_groups: int = 1,
+    ):
+        super().__init__(in_features, out_features, bias)
+        self.num_groups = num_groups
+        self.eps = 1e-5
+        self.norm = nn.LayerNorm(in_features)
+
+    def ste(self, x):
         """
-        Initializes the BitLinear module.
+        Applies the sign function for binarization and uses Straight-Through Estimator (STE) during backward pass.
 
-        Parameters:
-        - in_features: An integer, the number of input features.
-        - out_features: An integer, the number of output features.
-        - bias: A boolean, whether the layer includes a bias.
-        """
-        super().__init__()
-        self.in_features = in_features
-        self.out_features = out_features
-
-        # Initialize weights and bias
-        self.weight = nn.Parameter(torch.randn(out_features, in_features))
-        if bias:
-            self.bias = nn.Parameter(torch.randn(out_features))
-        else:
-            self.register_parameter("bias", None)
-
-        # Learnable parameters for quantization and dequantization
-        self.gamma = nn.Parameter(torch.ones(in_features))
-        self.beta = nn.Parameter(torch.ones(out_features))
-
-    def forward(self, input):
-        """
-        Forward pass of the BitLinear module.
-
-        Parameters:
-        - input: A tensor of shape (batch_size, in_features).
+        Args:
+            x (Tensor): Input tensor.
 
         Returns:
-        - output: A tensor of shape (batch_size, out_features).
+            Tensor: Binarized tensor.
         """
-        # Apply Layer Normalization
-        input_norm = F.layer_norm(input, (self.in_features,))
+        binarized_x = torch.sign(x)
+        binarized_x = (binarized_x - x).detach() + x
+        return binarized_x
 
-        # Absmax Quantization
-        quant_scale = torch.max(torch.abs(input_norm), dim=1, keepdim=True).values
-        input_quant = torch.sign(input_norm) * (quant_scale / self.gamma)
+    def binarize_weights_groupwise(self):
+        """
+        Binarizes the weights of the layer in a group-wise manner using STE.
 
-        # 1-bit Weights Quantization
-        weight_quant = torch.sign(self.weight)
+        Returns:
+            Tensor: Binarized weights tensor.
+        """
+        group_size = self.weight.shape[0] // self.num_groups
+        binarized_weights = torch.zeros_like(self.weight)
 
-        # MatMul with 1-bit weights using torch.matmul for explicit operation
-        output = torch.matmul(input_quant, weight_quant.t())
+        for g in range(self.num_groups):
+            start_idx = g * group_size
+            end_idx = (g + 1) * group_size
+            weight_group = self.weight[start_idx:end_idx]
 
-        # Adding bias if it exists
-        if self.bias is not None:
-            output += self.bias.unsqueeze(0).expand_as(output)
+            alpha_g = weight_group.mean()
+            binarized_weights[start_idx:end_idx] = self.ste(weight_group - alpha_g)
 
-        # Dequantization with learnable parameters
-        output = output * self.beta.unsqueeze(0).expand_as(output)
+        return binarized_weights
 
+    def quantize_activations_groupwise(self, x, b=8):
+        """
+        Quantizes the activations of the layer in a group-wise manner.
+
+        Args:
+            x (Tensor): Input tensor.
+            b (int, optional): Number of bits for quantization. Default is 8.
+
+        Returns:
+            Tensor: Quantized activations tensor.
+        """
+        Q_b = 2 ** (b - 1)
+
+        group_size = x.shape[0] // self.num_groups
+        quantized_x = torch.zeros_like(x)
+
+        for g in range(self.num_groups):
+            start_idx = g * group_size
+            end_idx = (g + 1) * group_size
+            activation_group = x[start_idx:end_idx]
+
+            gamma_g = activation_group.abs().max()
+            quantized_x[start_idx:end_idx] = torch.clamp(
+                activation_group * Q_b / (gamma_g + self.eps),
+                -Q_b + self.eps,
+                Q_b - self.eps,
+            )
+
+        return quantized_x
+
+    def forward(self, x: Tensor) -> Tensor:
+        """
+        Forward pass of the BitLinear layer.
+
+        Args:
+            x (Tensor): Input tensor.
+
+        Returns:
+            Tensor: Output tensor.
+        """
+        # Normalize input
+        x = self.norm(x)
+
+        # Binarize weights and quantize activations
+        binarized_weights = self.binarize_weights_groupwise()
+
+        # Perform linear transformation
+        output = torch.nn.functional.linear(x, binarized_weights, self.bias)
+
+        # Quantize activations
+        output = self.quantize_activations_groupwise(output)
+
+        # Return output
         return output
