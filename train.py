@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 from zeta.optim import StableAdamWUnfused
 
 from bitnet.at import AutoregressiveWrapper
-from bitnet.bit_transformer import BitNetTransformer
+from bitnet import BitNetTransformer
 
 # constants
 

@@ -54,7 +54,9 @@ class Transformer(nn.Module):
 
     """
 
-    def __init__(self, dim: int, heads: int, depth: int, ff_mult: int = 2, *args, **kwargs):
+    def __init__(
+        self, dim: int, heads: int, depth: int, ff_mult: int = 2, *args, **kwargs
+    ):
         super().__init__()
         self.layers = nn.ModuleList([])
         self.ffn_layers = nn.ModuleList([])
@@ -63,12 +65,19 @@ class Transformer(nn.Module):
             self.layers.append(BitMGQA(dim, heads, *args, **kwargs))
 
             self.ffn_layers.append(
-                BitFeedForward(dim=dim, ff_mult=ff_mult),
+                BitFeedForward(
+                    dim,
+                    dim,
+                    ff_mult,
+                    swish=True,
+                    post_act_ln=True,
+                    dropout=0.1,
+                ),
             )
 
     def forward(self, x: Tensor, *args, **kwargs) -> Tensor:
         for attn, ffn in zip(self.layers, self.ffn_layers):
-            print(x.shape)
+            # print(x.shape)
             x, _ = attn(x, x, x, is_causal=True, *args, **kwargs)
             x = x + x
             x = ffn(x) + x

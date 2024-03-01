@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from bitnet.replace_hf import replace_linears_in_hf
+from bitnet import replace_linears_in_hf
 
 # Load a model from Hugging Face's Transformers
 model_name = "bert-base-uncased"
