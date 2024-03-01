@@ -4,6 +4,7 @@ from bitnet.bitlinear import BitLinear
 from bitnet.inference import BitNetInference
 from bitnet.replace_hf import replace_linears_in_hf
 from bitnet.transformer import BitNetTransformer
+from bitnet.bit_attention import BitMGQA
 
 __all__ = [
     "BitLinear",
@@ -12,4 +13,5 @@ __all__ = [
     "BitFeedForward",
     "replace_linears_in_hf",
     "BitLinear15b",
+    "BitMGQA",
 ]

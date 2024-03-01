@@ -67,6 +67,27 @@ logits = bitnet(tokens)
 print(logits.shape)
 ```
 
+
+### `BitAttention`
+This Attention has been modified to use BitLinear instead of the default linear projection. It's also using Multi-Grouped Query Attention instead of regular multi-head attention for faster decoding and longer context handling.
+
+```python
+import torch
+from bitnet import BitMGQA
+
+# Create a random tensor of shape (1, 10, 512)
+x = torch.randn(1, 10, 512)
+
+# Create an instance of the BitMGQA model with input size 512, 8 attention heads, and 4 layers
+gqa = BitMGQA(512, 8, 4)
+
+# Pass the input tensor through the BitMGQA model and get the output and attention weights
+out, attn = gqa(x, x, x, need_weights=True)
+
+# Print the shapes of the output tensor and attention tensor
+print(out.shape, attn.shape)
+```
+
 ### `BitFeedForward`
 - Feedforward as shown in the diagram with BitLinear and a GELU:
 - Linear -> GELU -> Linear

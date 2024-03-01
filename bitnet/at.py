@@ -33,6 +33,15 @@ def top_k(logits, thres=0.9):
 
 
 class AutoregressiveWrapper(nn.Module):
+    """
+    AutoregressiveWrapper is a wrapper class that adds autoregressive generation functionality to a given neural network.
+
+    Args:
+        net (nn.Module): The neural network model.
+        max_seq_len (int): The maximum sequence length for generation. Defaults to 2048.
+        pad_value (int): The padding value for generated sequences. Defaults to 0.
+    """
+
     def __init__(self, net, max_seq_len=2048, pad_value=0):
         super().__init__()
         self.max_seq_len = max_seq_len
@@ -50,6 +59,21 @@ class AutoregressiveWrapper(nn.Module):
         filter_thres=0.9,
         **kwargs,
     ):
+        """
+        Generates autoregressive sequences based on the given start tokens.
+
+        Args:
+            start_tokens (torch.Tensor): The initial tokens to start the generation.
+            seq_len (int): The length of the generated sequence.
+            eos_token (int, optional): The end-of-sequence token. If provided, generation will stop when this token is generated. Defaults to None.
+            temperature (float, optional): The temperature value for controlling the randomness of the generation. Higher values result in more randomness. Defaults to 1.0.
+            filter_thres (float, optional): The threshold value for filtering logits during generation. Only logits above this threshold will be considered. Defaults to 0.9.
+            **kwargs: Additional keyword arguments to be passed to the underlying network.
+
+        Returns:
+            torch.Tensor: The generated sequence.
+        """
+
         b, t, device = *start_tokens.shape, start_tokens.device
 
         out = start_tokens
