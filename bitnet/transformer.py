@@ -69,7 +69,7 @@ class Transformer(nn.Module):
     def forward(self, x: Tensor, *args, **kwargs) -> Tensor:
         for attn, ffn in zip(self.layers, self.ffn_layers):
             print(x.shape)
-            x, _ = attn(x, x, x, is_causal=True, *args, **kwargs) 
+            x, _ = attn(x, x, x, is_causal=True, *args, **kwargs)
             x = x + x
             x = ffn(x) + x
         return x
