@@ -21,7 +21,7 @@ class BitLinear(nn.Linear):
         out_features: int,
         bias: bool = True,
         num_groups: int = 1,
-        b: int=8,
+        b: int = 8,
     ):
         super().__init__(in_features, out_features, bias)
         self.num_groups = num_groups
