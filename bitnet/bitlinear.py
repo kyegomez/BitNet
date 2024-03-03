@@ -49,6 +49,7 @@ class BitLinear(nn.Linear):
         """
         group_size = self.weight.shape[0] // self.num_groups
         binarized_weights = torch.zeros_like(self.weight)
+        self.beta = torch.zeros((self.weight.shape[0],1))
 
         for g in range(self.num_groups):
             start_idx = g * group_size
@@ -56,7 +57,10 @@ class BitLinear(nn.Linear):
             weight_group = self.weight[start_idx:end_idx]
 
             alpha_g = weight_group.mean()
+            beta_g = weight_group.abs().mean()
             binarized_weights[start_idx:end_idx] = self.ste(weight_group - alpha_g)
+            self.beta[start_idx:end_idx] = beta_g
+            
 
         return binarized_weights
 
@@ -72,9 +76,11 @@ class BitLinear(nn.Linear):
             Tensor: Quantized activations tensor.
         """
         Q_b = 2 ** (b - 1)
-
+        self.Qb = Q_b
+        
         group_size = x.shape[0] // self.num_groups
         quantized_x = torch.zeros_like(x)
+        self.gamma = torch.zeros((x.shape[0],1))
 
         for g in range(self.num_groups):
             start_idx = g * group_size
@@ -82,6 +88,7 @@ class BitLinear(nn.Linear):
             activation_group = x[start_idx:end_idx]
 
             gamma_g = activation_group.abs().max()
+            self.gamma[start_idx:end_idx] = gamma_g
             quantized_x[start_idx:end_idx] = torch.clamp(
                 activation_group * Q_b / (gamma_g + self.eps),
                 -Q_b + self.eps,
@@ -111,6 +118,9 @@ class BitLinear(nn.Linear):
 
         # Quantize activations
         output = self.quantize_activations_groupwise(output)
+
+        # Dequatization according to Eq.(11)
+        output *= self.beta * self.gamma / self.Qb
 
         # Return output
         return output
