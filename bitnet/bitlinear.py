@@ -12,6 +12,7 @@ class BitLinear(nn.Linear):
         out_features (int): Number of output features.
         bias (bool, optional): If set to False, the layer will not learn an additive bias. Default is True.
         num_groups (int, optional): Number of groups to divide the weights and activations into. Default is 1.
+        b (int,optional): Number of bits used to quantize activation. Default is 8.
     """
 
     def __init__(
@@ -20,11 +21,23 @@ class BitLinear(nn.Linear):
         out_features: int,
         bias: bool = True,
         num_groups: int = 1,
+        b: int=8,
     ):
         super().__init__(in_features, out_features, bias)
         self.num_groups = num_groups
         self.eps = 1e-5
         self.norm = nn.LayerNorm(in_features)
+
+        # Quantization variables
+        Qb = 2 ** (b - 1)
+        self.register_buffer('Qb', Qb)
+
+        # prepare tensors for dequantization:
+        beta = torch.zeros((self.weight.shape[0],1))
+        self.register_buffer('beta', beta)
+        gamma = torch.zeros((self.weight.shape[0],1))
+        self.register_buffer('gamma', gamma)
+        
 
     def ste(self, x):
         """
@@ -49,7 +62,6 @@ class BitLinear(nn.Linear):
         """
         group_size = self.weight.shape[0] // self.num_groups
         binarized_weights = torch.zeros_like(self.weight)
-        self.beta = torch.zeros((self.weight.shape[0],1))
 
         for g in range(self.num_groups):
             start_idx = g * group_size
@@ -75,12 +87,8 @@ class BitLinear(nn.Linear):
         Returns:
             Tensor: Quantized activations tensor.
         """
-        Q_b = 2 ** (b - 1)
-        self.Qb = Q_b
-        
         group_size = x.shape[0] // self.num_groups
         quantized_x = torch.zeros_like(x)
-        self.gamma = torch.zeros((x.shape[0],1))
 
         for g in range(self.num_groups):
             start_idx = g * group_size
@@ -90,9 +98,9 @@ class BitLinear(nn.Linear):
             gamma_g = activation_group.abs().max()
             self.gamma[start_idx:end_idx] = gamma_g
             quantized_x[start_idx:end_idx] = torch.clamp(
-                activation_group * Q_b / (gamma_g + self.eps),
-                -Q_b + self.eps,
-                Q_b - self.eps,
+                activation_group * self.Qb / (gamma_g + self.eps),
+                -self.Qb + self.eps,
+                self.Qb - self.eps,
             )
 
         return quantized_x
