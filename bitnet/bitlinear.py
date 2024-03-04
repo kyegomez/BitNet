@@ -20,8 +20,12 @@ class BitLinear(nn.Linear):
         out_features: int,
         bias: bool = True,
         num_groups: int = 1,
+        b: int = 8,
     ):
         super().__init__(in_features, out_features, bias)
+        self.in_features = in_features
+        self.out_features = out_features
+        self.b = b
         self.num_groups = num_groups
         self.eps = 1e-5
         self.norm = nn.LayerNorm(in_features)
@@ -60,7 +64,7 @@ class BitLinear(nn.Linear):
 
         return binarized_weights
 
-    def quantize_activations_groupwise(self, x, b=8):
+    def quantize_activations_groupwise(self, x):
         """
         Quantizes the activations of the layer in a group-wise manner.
 
@@ -71,7 +75,7 @@ class BitLinear(nn.Linear):
         Returns:
             Tensor: Quantized activations tensor.
         """
-        Q_b = 2 ** (b - 1)
+        Q_b = 2 ** (self.b - 1)
 
         group_size = x.shape[0] // self.num_groups
         quantized_x = torch.zeros_like(x)
@@ -89,6 +93,27 @@ class BitLinear(nn.Linear):
             )
 
         return quantized_x
+    
+    def dequantize_activations_groupwise(self, x):
+        """
+        Dequantizes the activations of the layer in a group-wise manner.
+
+        Args:
+            x (Tensor): Quantized input tensor.
+            b (int, optional): Number of bits used during the quantization. Default is 8.
+
+        Returns:
+            Tensor: Dequantized activations tensor.
+        """
+        Q_b = 2 ** (self.b - 1)
+        dequantized_x = torch.zeros_like(x)
+        for g in range(self.num_groups):
+            start_idx = g * x.shape[0] // self.num_groups
+            end_idx = (g + 1) * x.shape[0] // self.num_groups
+            quantized_group = x[start_idx:end_idx]
+            gamma_g = quantized_group.abs().max()
+            dequantized_x[start_idx:end_idx] = quantized_group * gamma_g / Q_b
+        return dequantized_x
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -111,6 +136,9 @@ class BitLinear(nn.Linear):
 
         # Quantize activations
         output = self.quantize_activations_groupwise(output)
+        
+        # Dequantize activations
+        output = self.dequantize_activations_groupwise(output)
 
         # Return output
         return output
