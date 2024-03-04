@@ -53,13 +53,15 @@ class BitLinear(nn.Linear):
         """
         group_size = self.weight.shape[0] // self.num_groups
         binarized_weights = torch.zeros_like(self.weight)
-
+        self.beta = []
+        
         for g in range(self.num_groups):
             start_idx = g * group_size
             end_idx = (g + 1) * group_size
             weight_group = self.weight[start_idx:end_idx]
-
             alpha_g = weight_group.mean()
+            beta_g = weight_group.abs().mean()
+            self.beta.append(beta_g)
             binarized_weights[start_idx:end_idx] = self.ste(weight_group - alpha_g)
 
         return binarized_weights
@@ -107,12 +109,12 @@ class BitLinear(nn.Linear):
         """
         Q_b = 2 ** (self.b - 1)
         dequantized_x = torch.zeros_like(x)
-        for g in range(self.num_groups):
+        for g, i in enumerate(range(self.num_groups)):
             start_idx = g * x.shape[0] // self.num_groups
             end_idx = (g + 1) * x.shape[0] // self.num_groups
             quantized_group = x[start_idx:end_idx]
             gamma_g = quantized_group.abs().max()
-            dequantized_x[start_idx:end_idx] = quantized_group * gamma_g / Q_b
+            dequantized_x[start_idx:end_idx] = quantized_group * gamma_g * self.beta[i] / Q_b
         return dequantized_x
 
     def forward(self, x: Tensor) -> Tensor:
