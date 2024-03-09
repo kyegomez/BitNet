@@ -25,10 +25,14 @@ class BitLinear(nn.Linear):
         super().__init__(in_features, out_features, bias)
         self.in_features = in_features
         self.out_features = out_features
-        self.b = b
         self.num_groups = num_groups
         self.eps = 1e-5
         self.norm = nn.LayerNorm(in_features)
+
+        # Quantiziation and dequantization
+        self.Q_b = 2 ** (b - 1)
+        self.beta = torch.zeros((self.weight.shape[0], 1))
+        self.gamma = torch.zeros((self.weight.shape[0], 1))
 
     def ste(self, x):
         """
@@ -58,8 +62,8 @@ class BitLinear(nn.Linear):
             start_idx = g * group_size
             end_idx = (g + 1) * group_size
             weight_group = self.weight[start_idx:end_idx]
-
             alpha_g = weight_group.mean()
+            self.beta[start_idx:end_idx] = weight_group.abs().mean()
             binarized_weights[start_idx:end_idx] = self.ste(weight_group - alpha_g)
 
         return binarized_weights
@@ -75,8 +79,6 @@ class BitLinear(nn.Linear):
         Returns:
             Tensor: Quantized activations tensor.
         """
-        Q_b = 2 ** (self.b - 1)
-
         group_size = x.shape[0] // self.num_groups
         quantized_x = torch.zeros_like(x)
 
@@ -86,34 +88,26 @@ class BitLinear(nn.Linear):
             activation_group = x[start_idx:end_idx]
 
             gamma_g = activation_group.abs().max()
+            self.gamma[start_idx:end_idx] = gamma_g
             quantized_x[start_idx:end_idx] = torch.clamp(
-                activation_group * Q_b / (gamma_g + self.eps),
-                -Q_b + self.eps,
-                Q_b - self.eps,
+                activation_group * self.Q_b / (gamma_g + self.eps),
+                -self.Q_b + self.eps,
+                self.Q_b - self.eps,
             )
 
         return quantized_x
-    
+
     def dequantize_activations_groupwise(self, x):
         """
         Dequantizes the activations of the layer in a group-wise manner.
 
         Args:
             x (Tensor): Quantized input tensor.
-            b (int, optional): Number of bits used during the quantization. Default is 8.
 
         Returns:
             Tensor: Dequantized activations tensor.
         """
-        Q_b = 2 ** (self.b - 1)
-        dequantized_x = torch.zeros_like(x)
-        for g in range(self.num_groups):
-            start_idx = g * x.shape[0] // self.num_groups
-            end_idx = (g + 1) * x.shape[0] // self.num_groups
-            quantized_group = x[start_idx:end_idx]
-            gamma_g = quantized_group.abs().max()
-            dequantized_x[start_idx:end_idx] = quantized_group * gamma_g / Q_b
-        return dequantized_x
+        return x * self.gamma * self.beta / self.Q_b
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -131,14 +125,22 @@ class BitLinear(nn.Linear):
         # Binarize weights and quantize activations
         binarized_weights = self.binarize_weights_groupwise()
 
-        # Perform linear transformation
-        output = torch.nn.functional.linear(x, binarized_weights, self.bias)
+        # Quantize input
+        x_quant = self.quantize_activations_groupwise(x)
 
-        # Quantize activations
-        output = self.quantize_activations_groupwise(output)
-        
+        # Perform linear transformation
+        output = torch.nn.functional.linear(x_quant, binarized_weights, self.bias)
+
         # Dequantize activations
         output = self.dequantize_activations_groupwise(output)
 
         # Return output
         return output
+
+
+if __name__ == "__main__":
+    # Example usage
+    bitlinear = BitLinear(10, 6, num_groups=2, b=8)
+    input_tensor = torch.randn(6, 10)  # Example input tensor
+    output = bitlinear(input_tensor)
+    print(output)  # Example output tensor
