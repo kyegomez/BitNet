@@ -14,15 +14,15 @@ def absmean_quantize_weights(weights):
     """
     # Calculate the average absolute value (γ) of the weights
     gamma = torch.mean(torch.abs(weights))
-    
+
     # Scale weights by γ and round to the nearest integer among {-1, 0, +1}
     quantized_weights = torch.clamp(torch.round(weights / gamma), min=-1, max=1)
-    
+    # quantized_weights = torch.clamp(torch.round(weights / (gamma + 1e-5)), min=-1, max=1)
+
     return quantized_weights
 
 
-
-class BitLinear(nn.Linear):
+class BitLinearNew(nn.Linear):
     """
     BitLinear is a custom linear layer that performs binarization of weights and quantization of activations
     in a group-wise manner.
@@ -113,7 +113,7 @@ class BitLinear(nn.Linear):
             )
 
         return quantized_x
-    
+
     def dequantize_activations_groupwise(self, x):
         """
         Dequantizes the activations of the layer in a group-wise manner.
@@ -145,18 +145,17 @@ class BitLinear(nn.Linear):
         Returns:
             Tensor: Output tensor.
         """
-        # Normalize input
-        x = self.norm(x)
-
+        
         # Binarize weights and quantize activations
         binarized_weights = self.binarize_weights_groupwise()
 
         # Perform linear transformation
         output = torch.nn.functional.linear(x, binarized_weights, self.bias)
-
+    
         # Quantize activations
         output = absmean_quantize_weights(output)
-        
+        print(output)
+
         # Dequantize activations
         # output = self.dequantize_activations_groupwise(output)
 
@@ -164,8 +163,8 @@ class BitLinear(nn.Linear):
         return output
 
 
-# Example usage
-bitlinear = BitLinear(10, 5, num_groups=2, b=8)
-input_tensor = torch.randn(5, 10)  # Example input tensor
-output = bitlinear(input_tensor)
-print(output)  # Example output tensor
+# # Forward pass
+# x = torch.randn(16, 10)
+# layer = BitLinearNew(10, 20, num_groups=2)
+# output = layer(x)
+# print(output)

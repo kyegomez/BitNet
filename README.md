@@ -13,6 +13,7 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 ## **NEWS**
 - **New Iteration** 🔥 There is an all-new iteration from the paper "[The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits](https://arxiv.org/abs/2402.17764)", we're implementing it now. Join the Agora discord and contribute! [Join Here](https://discord.gg/hFzevCjG8c)
 - **New Optimizations** The first `BitLinear` has been optimized and we now have a Bit Attention `BitMGQA` That implements BitLinear into the attention mechanism. Multi Grouped Query Attention is also widely recognized as the best attention for its fast decoding and long context handling, thanks to Frank for his easy to use implementation!
+- **BitLinear 1.5 Launch 🔥**: The new BitLinear 1.5 is still in progress 🔥 [Here is the file]() There are still some bugs like with the dequantization algorithm and we still need to replace the multiplication with elementwisw addition, if you could help with this, this would be amazing.
 
 ## Appreciation
 - Dimitry, Nullonix for analysis and code review and revision
@@ -40,6 +41,25 @@ layer = BitLinear(512, 400)
 y = layer(x)
 
 print(y)
+```
+
+### BitLinearNew
+```python
+import torch
+from bitnet import BitLinearNew
+
+# Create a random tensor of shape (16, 10)
+x = torch.randn(16, 10)
+
+# Create an instance of the BitLinearNew class with input size 10, output size 20, and 2 groups
+layer = BitLinearNew(10, 20, num_groups=2)
+
+# Perform a forward pass through the BitLinearNew layer with input x
+output = layer(x)
+
+# Print the output tensor
+print(output)
+
 ```
 ----
 
