@@ -137,10 +137,3 @@ class BitLinear(nn.Linear):
         # Return output
         return output
 
-
-if __name__ == "__main__":
-    # Example usage
-    bitlinear = BitLinear(10, 6, num_groups=2, b=8)
-    input_tensor = torch.randn(6, 10)  # Example input tensor
-    output = bitlinear(input_tensor)
-    print(output)  # Example output tensor
