@@ -45,7 +45,9 @@ print(y)
 
 ### BitLinearNew
 🔥 -> Trenary Weights [1, 0, -1]
+
 🔥 -> All addition not multiplication
+
 🔥 -> Faster, Cheaper, Better
 ```python
 import torch
