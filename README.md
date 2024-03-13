@@ -14,6 +14,7 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 - **New Iteration** 🔥 There is an all-new iteration from the paper "[The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits](https://arxiv.org/abs/2402.17764)", we're implementing it now. Join the Agora discord and contribute! [Join Here](https://discord.gg/hFzevCjG8c)
 - **New Optimizations** The first `BitLinear` has been optimized and we now have a Bit Attention `BitMGQA` That implements BitLinear into the attention mechanism. Multi Grouped Query Attention is also widely recognized as the best attention for its fast decoding and long context handling, thanks to Frank for his easy to use implementation!
 - **BitLinear 1.5 Launch 🔥**: The new BitLinear 1.5 is still in progress 🔥 [Here is the file]() There are still some bugs like with the dequantization algorithm and we still need to replace the multiplication with elementwisw addition, if you could help with this, this would be amazing.
+- **NOTICE**: A model obviously needs to be finetuned from scratch to use BitLinear, just changing the linear methods in an already trained model isn't going to work. Finetune or train from scratch.
 
 ## Appreciation
 - Dimitry, Nullonix for analysis and code review and revision
