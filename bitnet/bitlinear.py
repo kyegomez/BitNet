@@ -131,15 +131,8 @@ class BitLinear(nn.Linear):
         # Perform linear transformation
         output = torch.nn.functional.linear(x_quant, binarized_weights, self.bias)
 
-<<<<<<< HEAD
-=======
-        # Quantize activations
-        output = self.quantize_activations_groupwise(output)
-
->>>>>>> 296003d ([FEAT][BitlinearNew])
         # Dequantize activations
         output = self.dequantize_activations_groupwise(output)
 
         # Return output
         return output
-

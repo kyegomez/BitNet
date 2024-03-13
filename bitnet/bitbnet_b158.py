@@ -17,7 +17,6 @@ def absmean_quantize_weights(weights):
 
     # Scale weights by γ and round to the nearest integer among {-1, 0, +1}
     quantized_weights = torch.clamp(torch.round(weights / gamma), min=-1, max=1)
-    # quantized_weights = torch.clamp(torch.round(weights / (gamma + 1e-5)), min=-1, max=1)
 
     return quantized_weights
 
@@ -145,13 +144,13 @@ class BitLinearNew(nn.Linear):
         Returns:
             Tensor: Output tensor.
         """
-        
+
         # Binarize weights and quantize activations
         binarized_weights = self.binarize_weights_groupwise()
 
         # Perform linear transformation
         output = torch.nn.functional.linear(x, binarized_weights, self.bias)
-    
+
         # Quantize activations
         output = absmean_quantize_weights(output)
         print(output)
