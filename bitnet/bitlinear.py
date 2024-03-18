@@ -31,8 +31,8 @@ class BitLinear(nn.Linear):
 
         # Quantiziation and dequantization
         self.Q_b = 2 ** (b - 1)
-        self.beta = torch.zeros((self.weight.shape[0], 1))
-        self.gamma = torch.zeros((self.weight.shape[0], 1))
+        self.beta = torch.zeros((self.weight.shape[0]))
+        #self.gamma = torch.zeros((self.weight.shape[0], 1))
 
     def ste(self, x):
         """
@@ -81,6 +81,7 @@ class BitLinear(nn.Linear):
         """
         group_size = x.shape[0] // self.num_groups
         quantized_x = torch.zeros_like(x)
+        self.gamma = torch.zeros((x.shape[0], 1))
 
         for g in range(self.num_groups):
             start_idx = g * group_size
