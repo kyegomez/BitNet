@@ -24,7 +24,7 @@ def weight_quant(w: Tensor):
     return u
 
 
-class BitLinear(nn.Linear):
+class BitLinearNew(nn.Linear):
     """
     Custom linear layer with bit quantization.
 
