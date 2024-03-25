@@ -48,6 +48,6 @@ void gemm_lowbit(at::Tensor a, at::Tensor b, at::Tensor c, float w_scale, float 
     c.mul_(1.0 / (w_scale * x_scale));
 }
 
-PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("gemm_lowbit", &gemm_lowbit, "Low precision GEMM operation with scaling factors");
-}
+// PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
+//     m.def("gemm_lowbit", &gemm_lowbit, "Low precision GEMM operation with scaling factors");
+// }
