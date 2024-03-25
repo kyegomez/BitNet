@@ -6,7 +6,7 @@ setup(
     ext_modules=[
         CUDAExtension(
             name='gemm_lowbit_ext',
-            sources=['kernel/gemm_lowbit.cpp', 'kernel/gemm_lowbit_kernel.cu'],  # Adjusted paths
+            sources=['kernel/gemm_lowbit_kernel.cu'],  # Adjusted paths
             extra_compile_args={'cxx': [], 'nvcc': []}
         )
     ],
