@@ -1,54 +1,29 @@
 #include <torch/extension.h>
-#include <ATen/ATen.h>
-#include <ATen/cuda/CUDAContext.h>
-#include <cuda_runtime.h>
-#include <cuda_fp16.h>
+#include <vector>
+#include <ATen/cuda/CUDAContext.h> // Ensure CUDA context for PyTorch is included
 
-// Declaration of the CUDA kernel remains unchanged
+// CUDA forward declarations
+void gemm_lowbit_cuda(at::Tensor a, at::Tensor b, at::Tensor c, int M, int N, int K);
 
-extern "C" void gemm_lowbit_cuda(
-    fp8 *a, fp8 *b, fp8 *c, int M, int N, int K);
+// The wrapper function to be called from Python
+void gemm_lowbit(at::Tensor a, at::Tensor b, at::Tensor c, float w_scale, float x_scale) {
+    auto M = a.size(0);
+    auto K = a.size(1);
+    auto N = b.size(1);
 
-// This is the corrected wrapper function
-void gemm_lowbit(
-    torch::Tensor a,
-    torch::Tensor b,
-    torch::Tensor c,
-    float w_scale,
-    float x_scale) {
+    // Ensure inputs are on the correct device and are of half precision
+    a = a.to(at::device(at::kCUDA).dtype(at::kHalf));
+    b = b.to(at::device(at::kCUDA).dtype(at::kHalf));
+    c = c.to(at::device(at::kCUDA).dtype(at::kHalf));
 
-    // Ensure tensors are on the correct device
-    a = a.to(at::kCUDA);
-    b = b.to(at::kCUDA);
-    c = c.to(at::kCUDA);
+    // Call the CUDA kernel wrapper
+    gemm_lowbit_cuda(a, b, c, M, N, K);
 
-    // Ensure tensors are of type half (FP16), as fp8 is typedef'd to half for demonstration
-    a = a.to(at::kHalf);
-    b = b.to(at::kHalf);
-    c = c.to(at::kHalf);
-
-    const auto M = a.size(0);
-    const auto K = a.size(1);
-    const auto N = b.size(1);
-
-    dim3 threads(16, 16);
-    dim3 blocks((N + threads.x - 1) / threads.x, (M + threads.y - 1) / threads.y);
-
-    // Directly call the CUDA kernel using tensor data pointers
-    gemm_lowbit_kernel<<<blocks, threads>>>(
-        a.data_ptr<at::Half>(),
-        b.data_ptr<at::Half>(),
-        c.data_ptr<at::Half>(),
-        M, N, K
-    );
-
-    // Synchronize to ensure CUDA operations have completed
-    cudaDeviceSynchronize();
-
-    // Apply scaling after ensuring the operation has completed
-    c.mul_(1.0 / (w_scale * x_scale));
+    // Apply scale factors
+    c.div_(w_scale * x_scale);
 }
 
+// The PyBind11 module definition
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("gemm_lowbit", &gemm_lowbit, "Low precision GEMM operation with scaling factors");
+    m.def("gemm_lowbit", &gemm_lowbit, "A low precision GEMM operation with scaling");
 }
