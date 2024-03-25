@@ -5,7 +5,7 @@ from bitnet import BitLinearNew
 x = torch.randn(16, 10)
 
 # Create an instance of the BitLinearNew class with input size 10, output size 20, and 2 groups
-layer = BitLinearNew(10, 20, num_groups=2)
+layer = BitLinearNew(10, 20,)
 
 # Perform a forward pass through the BitLinearNew layer with input x
 output = layer(x)
