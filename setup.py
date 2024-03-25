@@ -6,7 +6,7 @@ setup(
     ext_modules=[
         CUDAExtension(
             name='gemm_lowbit_ext',  # Extension name, used in Python import
-            sources=['gemm_lowbit_extension.cpp'],  # Source files
+            sources=['kernel/gemm_lowbit_extension.cpp'],  # Source files
             extra_compile_args={
                 'cxx': [],
                 'nvcc': [],  # You can specify extra args for nvcc here
