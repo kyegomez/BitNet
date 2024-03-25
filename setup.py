@@ -125,7 +125,7 @@ if not SKIP_CUDA_BUILD:
 
     ext_modules.append(
         CUDAExtension(
-            name="selective_scan_cuda",
+            name="gemm_lowbit_ext",
             sources=[
                 "kernel/gemm_lowbit_kernel.cu",
 
@@ -151,7 +151,7 @@ if not SKIP_CUDA_BUILD:
                     + cc_flag
                 ),
             },
-            include_dirs=[Path(this_dir) / "csrc" / "selective_scan"],
+            include_dirs=[Path(this_dir) / "kernel" / "bitnet"],
         )
     )
 
