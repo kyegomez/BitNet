@@ -2,9 +2,9 @@ import torch
 from gemm_lowbit_ext import gemm_lowbit
 
 # Example usage
-a = torch.randn(10, 20, dtype=torch.half, device='cuda')  # Example tensor
-b = torch.randn(20, 30, dtype=torch.half, device='cuda')  # Example tensor
-c = torch.empty(10, 30, dtype=torch.half, device='cuda')  # Output tensor
+a = torch.randn(10, 20, dtype=torch.half, device="cuda")  # Example tensor
+b = torch.randn(20, 30, dtype=torch.half, device="cuda")  # Example tensor
+c = torch.empty(10, 30, dtype=torch.half, device="cuda")  # Output tensor
 
 w_scale = 1.0  # Example scale factor
 x_scale = 1.0  # Example scale factor

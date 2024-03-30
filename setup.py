@@ -1,4 +1,3 @@
-
 import ast
 import os
 import platform
@@ -30,7 +29,9 @@ this_dir = os.path.dirname(os.path.abspath(__file__))
 
 PACKAGE_NAME = "bitnet"
 
-BASE_WHEEL_URL = "https://github.com/kyegomez/BitNet/releases/download/{tag_name}/{wheel_name}"
+BASE_WHEEL_URL = (
+    "https://github.com/kyegomez/BitNet/releases/download/{tag_name}/{wheel_name}"
+)
 
 # FORCE_BUILD: Force a fresh build locally, instead of attempting to find prebuilt wheels
 # SKIP_CUDA_BUILD: Intended to allow CI to use a simple `python setup.py sdist` run to copy over raw files, without any cuda compilation
@@ -100,7 +101,7 @@ if not SKIP_CUDA_BUILD:
                 f"{PACKAGE_NAME} is only supported on CUDA 11.6 and above.  "
                 "Note: make sure nvcc has a supported version by running nvcc -V."
             )
-            
+
     cc_flag.append("-gencode")
     cc_flag.append("arch=compute_53,code=sm_53")
     cc_flag.append("-gencode")
@@ -128,7 +129,6 @@ if not SKIP_CUDA_BUILD:
             name="gemm_lowbit_ext",
             sources=[
                 "kernel/gemm_lowbit_kernel.cu",
-
             ],
             extra_compile_args={
                 "cxx": ["-O3", "-std=c++17"],
@@ -175,7 +175,9 @@ def get_wheel_url():
     torch_version_raw = parse(torch.__version__)
     # For CUDA 11, we only compile for CUDA 11.8, and for CUDA 12 we only compile for CUDA 12.2
     # to save CI time. Minor versions should be compatible.
-    torch_cuda_version = parse("11.8") if torch_cuda_version.major == 11 else parse("12.2")
+    torch_cuda_version = (
+        parse("11.8") if torch_cuda_version.major == 11 else parse("12.2")
+    )
     python_version = f"cp{sys.version_info.major}{sys.version_info.minor}"
     platform_name = get_platform()
     mamba_ssm_version = get_package_version()

@@ -50,9 +50,8 @@ class BitLinearNew(nn.Linear):
             Tensor: The output tensor.
 
         """
-        b, s, d = x.shape
         w = self.weight
-        x_norm = RMSNorm(d)(x)
+        x_norm = RMSNorm(self.in_features)(x)
 
         # STE using detach
         x_quant = x_norm + (activation_quant(x_norm) - x_norm).detach()
