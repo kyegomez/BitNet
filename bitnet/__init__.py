@@ -1,6 +1,6 @@
 from bitnet.bit_attention import BitMGQA
 from bitnet.bit_ffn import BitFeedForward
-from bitnet.bit_linear import BitLinearNew
+from bitnet.bit_linear_new import BitLinearNew
 from bitnet.bit_transformer import BitNetTransformer
 from bitnet.bitlinear import BitLinear
 from bitnet.inference import BitNetInference

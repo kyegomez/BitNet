@@ -1,5 +1,5 @@
 from torch import nn, Tensor
-from zeta.nn import RMSNorm
+# from zeta.nn import RMSNorm
 import torch.nn.functional as F
 
 
@@ -51,7 +51,8 @@ class BitLinearNew(nn.Linear):
 
         """
         w = self.weight
-        x_norm = RMSNorm(self.in_features)(x)
+        # x_norm = RMSNorm(self.in_features)(x)
+        x_norm = nn.LayerNorm(self.in_features)(x)
 
         # STE using detach
         x_quant = x_norm + (activation_quant(x_norm) - x_norm).detach()

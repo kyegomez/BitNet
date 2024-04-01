@@ -3,7 +3,7 @@ import torch
 from bitnet import BitLinear
 
 # Input
-x = torch.randn(10, 512)
+x = torch.randn(10, 1000, 512)
 
 # BitLinear layer
 layer = BitLinear(512, 400)
@@ -12,3 +12,4 @@ layer = BitLinear(512, 400)
 y = layer(x)
 
 print(y)
+print(y.shape)
