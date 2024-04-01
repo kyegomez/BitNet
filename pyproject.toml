@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "bitnet"
-version = "0.2.0"
+version = "0.2.1"
 description = "bitnet - Pytorch"
 license = "MIT"
 authors = ["Kye Gomez <kye@apac.ai>"]
@@ -25,7 +25,7 @@ classifiers = [
 python = "^3.6"
 torch = "*"
 einops = "*"
-zetascale = "2.1.6"
+zetascale = "*"
 
 
 
