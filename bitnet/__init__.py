@@ -5,6 +5,7 @@ from bitnet.bit_transformer import BitNetTransformer
 from bitnet.bitlinear import BitLinear
 from bitnet.inference import BitNetInference
 from bitnet.replace_hf import replace_linears_in_hf, replace_linears_in_pytorch_model
+from bitnet.bit_lora import BitLora
 
 __all__ = [
     "BitFeedForward",
@@ -15,4 +16,5 @@ __all__ = [
     "BitMGQA",
     "BitLinearNew",
     "BitLinear",
+    "BitLora",
 ]
