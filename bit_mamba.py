@@ -4,7 +4,7 @@ from bitnet import BitMamba
 # Create a random tensor of shape (2, 10, 512)
 x = torch.randn(2, 10, 512)
 
-# Create an instance of the BitMamba model with input size 512 and output size 6
+# Create an instance of the BitMamba model with input size 512 and depth size 6
 model = BitMamba(512, 6)
 
 # Pass the input tensor through the model to get the output
