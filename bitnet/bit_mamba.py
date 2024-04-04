@@ -6,17 +6,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from bitnet.bitlinear import BitLinear
-
-"""
-
-An implementation of the parallel scan operation in PyTorch (Blelloch version).
-This code follows the skeleton proposed by Francois Fleuret in his pscan. However, the keys differences are :
--it has been written in an iterative way (rather than recursive)
--the backward pass has been rewritten
-
-Please see docs/pscan.ipynb for a detailed explanation of what happens here.
-
-"""
+from zeta.nn import OutputHead
 
 
 # taken straight from https://github.com/johnma2006/mamba-minimal/blob/master/model.py
@@ -495,10 +485,24 @@ class MambaBlock(nn.Module):
 
 
 class Mamba(nn.Module):
-    def __init__(self, config: MambaConfig):
+    def __init__(
+        self,
+        num_tokens: int,
+        sequence_length: int,
+        config: MambaConfig,
+        return_embeddings: bool = True,
+        return_tokens: bool = True,
+    ):
         super().__init__()
-
+        self.num_tokens = num_tokens
+        self.sequence_length = sequence_length
         self.config = config
+        self.return_embeddings = return_embeddings
+        self.return_tokens = return_tokens
+
+        # Embedding
+        self.token_embed = nn.Embedding(num_tokens, config.dim)
+        self.norm = nn.LayerNorm(config.dim)
 
         self.layers = nn.ModuleList(
             [ResidualBlock(config) for _ in range(config.depth)]
@@ -509,13 +513,22 @@ class Mamba(nn.Module):
         # x : (B, L, D)
 
         # y : (B, L, D)
+        # Embedding
+        x = self.token_embed(x)
+        x = self.norm(x)
 
         for layer in self.layers:
             x = layer(x)
 
-        # x = self.norm_f(x)
+        x = self.norm(x)
 
-        return x
+        # Return embeddings or Logits
+        # Return Tokens
+        if self.return_tokens:
+            x = OutputHead(self.config.dim, -1)(x)
+            return x 
+        else:
+            return x
 
     def step(self, x, caches):
         # x : (B, L, D)
@@ -554,6 +567,8 @@ class BitMamba(nn.Module):
     def __init__(
         self,
         dim: int,  # D
+        num_tokens: int,
+        sequence_length: int,
         depth: int,
         dt_rank: Union[int, str] = "auto",
         d_state: int = 16,  # N in paper/comments
@@ -567,9 +582,15 @@ class BitMamba(nn.Module):
         bias: bool = False,
         conv_bias: bool = True,
         pscan: bool = True,  # use parallel scan mode or sequential mode when training
+        return_embeddings: bool = True,
+        return_tokens: bool = True,
+        *args,
+        **kwargs
     ):
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.dim = dim
+        self.num_token = num_tokens
+        self.sequence_length = sequence_length
         self.depth = depth
         self.dt_rank = dt_rank
         self.d_state = d_state
@@ -583,6 +604,8 @@ class BitMamba(nn.Module):
         self.bias = bias
         self.conv_bias = conv_bias
         self.pscan = pscan
+        self.return_embeddings = return_embeddings
+        self.return_tokens = return_tokens
 
         self.d_inner = self.expand_factor * self.dim
 
@@ -606,16 +629,14 @@ class BitMamba(nn.Module):
             conv_bias=self.conv_bias,
             pscan=self.pscan,
         )
-        self.mamba = Mamba(config)
+        self.mamba = Mamba(
+            num_tokens=self.num_token,
+            sequence_length=self.sequence_length,
+            config=config,
+            return_embeddings=self.return_embeddings,
+            return_tokens=self.return_tokens,
+        )
 
     def forward(self, x):
         return self.mamba(x)
 
-
-# x = torch.randn(2, 10, 512)
-
-# model = BitMamba(512, 6)
-
-# output = model(x)
-# print(output)
-# print(output.shape)
