@@ -17,10 +17,14 @@ def activation_quant(x: Tensor):
     return y
 
 
-def weight_quant(w: Tensor):
-    scale = w.abs().mean()
-    e = w.mean()
-    u = (w - e).sign() * scale
+def weight_quant(w):
+    """
+    from https://github.com/microsoft/unilm/blob/master/bitnet/The-Era-of-1-bit-LLMs__Training_Tips_Code_FAQ.pdf,
+    This is a little bit different from paper by adding '/ scale' in the end,
+    which is super crucial for training (7.5 loss vs 2.5)
+    """
+    scale = 1.0 / w.abs().mean().clamp_(min=1e-5)
+    u = (w * scale).round().clamp_(-1, 1) / scale
     return u
 
 
