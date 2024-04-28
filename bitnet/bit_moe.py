@@ -3,6 +3,9 @@ from torch import nn
 from bitnet.bitlinear import BitLinear
 import torch.nn.functional as F
 
+# Feedforward = mlp = expert
+# = Linear projection + non linear activation functions like [RELU, GELU, etc] + Dropout[optional] + Normalization[optional, LayerNorm]
+
 
 # Expert module
 class Expert(nn.Module):
@@ -86,6 +89,7 @@ class BitMoE(nn.Module):
         num_experts (int): The number of experts in the mixture.
         top_k (int, optional): The number of experts to select for each input. Defaults to 2.
     """
+
     def __init__(self, dim: int, num_experts: int, top_k: int = 2):
         super(BitMoE, self).__init__()
         self.router = NoisyTopkRouter(dim, num_experts, top_k)
