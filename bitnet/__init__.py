@@ -7,6 +7,7 @@ from bitnet.inference import BitNetInference
 from bitnet.replace_hf import replace_linears_in_hf, replace_linears_in_pytorch_model
 from bitnet.bit_lora import BitLora
 from bitnet.bit_mamba import BitMamba
+from bitnet.bit_moe import BitMoE
 
 __all__ = [
     "BitFeedForward",
@@ -19,4 +20,5 @@ __all__ = [
     "BitLinear",
     "BitLora",
     "BitMamba",
+    "BitMoE",
 ]

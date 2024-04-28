@@ -526,7 +526,7 @@ class Mamba(nn.Module):
         # Return Tokens
         if self.return_tokens:
             x = OutputHead(self.config.dim, -1)(x)
-            return x 
+            return x
         else:
             return x
 
@@ -639,4 +639,3 @@ class BitMamba(nn.Module):
 
     def forward(self, x):
         return self.mamba(x)
-
