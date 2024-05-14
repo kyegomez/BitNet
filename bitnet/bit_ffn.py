@@ -104,13 +104,19 @@ class BitFeedForward(nn.Module):
             project_in = nn.Sequential(
                 BitLinear(dim, inner_dim, bias=not no_bias, *args, **kwargs), activation
             )
-
-        self.ff = nn.Sequential(
+        if post_act_ln:
+            self.ff = nn.Sequential(
             project_in,
-            nn.LayerNorm(inner_dim) if post_act_ln else None,
+            nn.LayerNorm(inner_dim),
             nn.Dropout(dropout),
             BitLinear(inner_dim, dim_out, bias=not no_bias, *args, **kwargs),
         )
+        else:
+            self.ff = nn.Sequential(
+                project_in,
+                nn.Dropout(dropout),
+                BitLinear(inner_dim, dim_out, bias=not no_bias, *args, **kwargs),
+            )
 
         # init last linear layer to 0
         if zero_init_output:
