@@ -21,9 +21,12 @@ BitLinear = tensor -> layernorm -> Binarize -> abs max quantization -> dequant
 - Vyom, for providing 4080 to train!
 
 ## Installation
-`pip install bitnet`
+```bash
+pip3 install bitnet
+```
 
-## Usage:
+## Usage
+We have a vast selection of example scripts here and in the [examples folder:](/examples/), let me
 
 ### `BitLinear`
 - Example of the BitLinear layer which is the main innovation of the paper!
@@ -307,6 +310,36 @@ output = model(x)
 
 # Print the output
 print(output)
+```
+
+
+### 1 Bit Vision Transformers
+This idea came to me out of nowhere but it seems to be pretty fun, as you can leverage bitlinear for vision tasks for ultra-compression. It would be nice to train this on imagenet if you could make a script, we'll provide the compute. Then the next stage would be to train a join vision language model gpt-4o
+
+```python
+import torch
+from bitnet import OneBitViT
+
+# Create an instance of the OneBitViT model
+v = OneBitViT(
+    image_size=256,
+    patch_size=32,
+    num_classes=1000,
+    dim=1024,
+    depth=6,
+    heads=16,
+    mlp_dim=2048,
+)
+
+# Generate a random image tensor
+img = torch.randn(1, 3, 256, 256)
+
+# Pass the image through the OneBitViT model to get predictions
+preds = v(img)  # (1, 1000)
+
+# Print the predictions
+print(preds)
+
 ```
 
 # License
