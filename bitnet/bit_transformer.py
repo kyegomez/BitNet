@@ -75,12 +75,15 @@ class Transformer(nn.Module):
                     dropout=0.1,
                 ),
             )
+            
+        # Norm
+        self.norm = nn.LayerNorm(dim)
 
     def forward(self, x: Tensor, *args, **kwargs) -> Tensor:
         skip = x
         for attn, ffn in zip(self.layers, self.ffn_layers):
             x, _ = attn(x, x, x, is_causal=True, *args, **kwargs)
-            x = x + skip
+            x = self.norm(x + skip)
             x = ffn(x) + x
         return x
 
@@ -117,8 +120,8 @@ class BitNetTransformer(nn.Module):
         dim: int,
         depth: int,
         num_tokens: int,
-        heads=8,
-        ff_mult=4,
+        heads: int = 8,
+        ff_mult: int = 4,
     ):
         super().__init__()
         self.emb = nn.Embedding(num_tokens, dim)
@@ -132,8 +135,14 @@ class BitNetTransformer(nn.Module):
             dim,
             vocab_size=num_tokens,
         )
+        
+        # Norm
+        self.norm = nn.LayerNorm(dim)
 
     def forward(self, x):
         x = self.emb(x)
+        # Post emb norm
+        x = self.norm(x)
+        
         x = self.transformer(x)
         return self.to_logits(x)
