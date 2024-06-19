@@ -106,11 +106,11 @@ class BitFeedForward(nn.Module):
             )
         if post_act_ln:
             self.ff = nn.Sequential(
-            project_in,
-            nn.LayerNorm(inner_dim),
-            nn.Dropout(dropout),
-            BitLinear(inner_dim, dim_out, bias=not no_bias, *args, **kwargs),
-        )
+                project_in,
+                nn.LayerNorm(inner_dim),
+                nn.Dropout(dropout),
+                BitLinear(inner_dim, dim_out, bias=not no_bias, *args, **kwargs),
+            )
         else:
             self.ff = nn.Sequential(
                 project_in,

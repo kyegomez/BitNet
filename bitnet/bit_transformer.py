@@ -5,6 +5,7 @@ from torch import nn
 
 from bitnet.bit_ffn import BitFeedForward
 from bitnet.bit_attention import BitMGQA
+from zeta import OutputHead
 
 
 def l2norm(t, dim=-1):
@@ -126,7 +127,11 @@ class BitNetTransformer(nn.Module):
             dim=dim, depth=depth, heads=heads, ff_mult=ff_mult
         )
 
-        self.to_logits = nn.Sequential(RMSNorm(dim), nn.Linear(dim, num_tokens))
+        # self.to_logits = nn.Sequential(RMSNorm(dim), nn.Linear(dim, num_tokens))
+        self.to_logits = OutputHead(
+            dim,
+            vocab_size=num_tokens,
+        )
 
     def forward(self, x):
         x = self.emb(x)

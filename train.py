@@ -1,12 +1,10 @@
 import gzip
 import random
-
 import numpy as np
 import torch
 import tqdm
 from torch.utils.data import DataLoader, Dataset
 from zeta.optim import StableAdamWUnfused
-
 from bitnet.at import AutoregressiveWrapper
 from bitnet import BitNetTransformer
 
@@ -40,20 +38,18 @@ def decode_tokens(tokens):
 model = BitNetTransformer(num_tokens=256, dim=512, depth=8)
 model = AutoregressiveWrapper(model, max_seq_len=SEQ_LEN)
 
-
-# Use all available GPUs
-if torch.cuda.device_count() > 1:
-    print("Using", torch.cuda.device_count(), "GPUs!")
-    model = torch.nn.DataParallel(model)
-
-
-model.cuda()
+# Use CUDA if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 # prepare enwik8 data
 with gzip.open("./data/enwik8.gz") as file:
     X = np.fromstring(file.read(int(95e6)), dtype=np.uint8)
     trX, vaX = np.split(X, [int(90e6)])
     data_train, data_val = torch.from_numpy(trX), torch.from_numpy(vaX)
+
+data_train = data_train.to(device)
+data_val = data_val.to(device)
 
 
 class TextSamplerDataset(Dataset):
@@ -65,7 +61,7 @@ class TextSamplerDataset(Dataset):
     def __getitem__(self, index):
         rand_start = torch.randint(0, self.data.size(0) - self.seq_len, (1,))
         full_seq = self.data[rand_start : rand_start + self.seq_len + 1].long()
-        return full_seq.cuda()
+        return full_seq
 
     def __len__(self):
         return self.data.size(0) // self.seq_len
@@ -107,6 +103,6 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10.0, desc="training"):
         prime = decode_tokens(inp)
         print("%s \n\n %s", (prime, "*" * 100))
 
-        sample = model.module.generate(inp[None, ...], GENERATE_LENGTH)
+        sample = model.generate(inp[None, ...], GENERATE_LENGTH)
         output_str = decode_tokens(sample[0])
         print(output_str)

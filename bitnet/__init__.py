@@ -8,6 +8,7 @@ from bitnet.replace_hf import replace_linears_in_hf, replace_linears_in_pytorch_
 from bitnet.bit_lora import BitLora
 from bitnet.bit_mamba import BitMamba
 from bitnet.bit_moe import BitMoE
+from bitnet.one_bit_vision_transformers import OneBitViT
 
 __all__ = [
     "BitFeedForward",
@@ -21,4 +22,5 @@ __all__ = [
     "BitLora",
     "BitMamba",
     "BitMoE",
+    "OneBitViT",
 ]

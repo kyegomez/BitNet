@@ -18,4 +18,4 @@ bitnet = BitNetTransformer(
 logits = bitnet(x)
 
 # Print the shape of the output
-print(logits)
+print(logits.shape)
