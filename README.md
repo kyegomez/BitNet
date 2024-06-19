@@ -26,7 +26,8 @@ pip3 install bitnet
 ```
 
 ## Usage
-We have a vast selection of example scripts here and in the [examples folder:](/examples/), let me
+We have a vast selection of example scripts here and in the [examples folder:](/examples/), let me know if you want assistance with a use-case in the discord!
+
 
 ### `BitLinear`
 - Example of the BitLinear layer which is the main innovation of the paper!
